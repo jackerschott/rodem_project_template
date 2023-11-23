@@ -1,0 +1,41 @@
+_target_: src.datamodules.images.ImageDataModule
+_convert_: object
+
+train_set:
+  _target_: torchvision.datasets.CelebA
+  _partial_: True
+  root: ${paths.data_dir}
+  split: train
+  download: True
+  transform:
+    _target_: torchvision.transforms.Compose
+    transforms:
+      - _target_: torchvision.transforms.ToTensor
+      - _target_: torchvision.transforms.CenterCrop
+        size: 128
+      - _target_: torchvision.transforms.Resize
+        size: 32
+        antialias: True
+
+test_set:
+  _target_: torchvision.datasets.CelebA
+  _partial_: True
+  root: ${paths.data_dir}
+  split: test
+  download: True
+  transform:
+    _target_: torchvision.transforms.Compose
+    transforms:
+      - _target_: torchvision.transforms.ToTensor
+      - _target_: torchvision.transforms.CenterCrop
+        size: 128
+      - _target_: torchvision.transforms.Resize
+        size: 32
+        antialias: True
+
+loader_config:
+  pin_memory: true
+  batch_size: 128
+  num_workers: 8
+  drop_last: True
+  shuffle: True

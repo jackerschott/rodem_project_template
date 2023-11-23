@@ -1,0 +1,8 @@
+# output dir will be created by hydra
+data_dir: /home/matthew/Documents/data
+output_dir: /home/matthew/Documents/saved_networks
+user: mleigh
+
+# Interpolated
+root_dir: ${oc.env:PROJECT_ROOT}
+full_path: ${paths.output_dir}/${project_name}/${network_name}/

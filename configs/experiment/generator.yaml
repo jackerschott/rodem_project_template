@@ -1,0 +1,12 @@
+# @package _global_
+
+# Overwite trainer values
+trainer:
+  precision: 16-mixed
+
+precision: medium
+tags: ["example"]
+
+# Model modifications
+project_name: generation
+network_name: network1
