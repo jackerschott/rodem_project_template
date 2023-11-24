@@ -11,6 +11,7 @@ from omegaconf import DictConfig
 root = pyrootutils.setup_root(search_from=__file__, pythonpath=True)
 
 from mltools.mltools.hydra_utils import (
+    instantiate_collection,
     log_hyperparameters,
     print_config,
     reload_original_config,
@@ -49,10 +50,10 @@ def main(cfg: DictConfig) -> None:
         model = T.compile(model, mode=cfg.compile)
 
     log.info("Instantiating all callbacks")
-    callbacks = hydra.utils.instantiate(cfg.callbacks)
+    callbacks = instantiate_collection(cfg.callbacks)
 
     log.info("Instantiating the loggers")
-    loggers = hydra.utils.instantiate(cfg.loggers)
+    loggers = instantiate_collection(cfg.loggers)
 
     log.info("Instantiating the trainer")
     trainer = hydra.utils.instantiate(cfg.trainer, callbacks=callbacks, logger=loggers)

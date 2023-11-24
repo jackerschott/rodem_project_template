@@ -1,10 +1,11 @@
-_target_: lightning.pytorch.loggers.wandb.WandbLogger
-entity: ${paths.user}
-offline: False
-id: null
-log_model: False
-tags: ${tags}
-project: ${project_name}
-name: ${network_name}
-save_dir: ${paths.full_path}
-resume: ${full_resume}
+wandb:
+  _target_: lightning.pytorch.loggers.wandb.WandbLogger
+  entity: ${paths.user}
+  offline: False
+  id: null
+  log_model: False
+  tags: ${tags}
+  project: ${project_name}
+  name: ${network_name}
+  save_dir: ${paths.full_path}
+  resume: ${full_resume}
