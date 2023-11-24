@@ -1,4 +1,4 @@
-_target_: src.models.generator.UNetDiffusion
+_target_: src.{{ cookiecutter.python_package }}.models.generator.UNetDiffusion
 
 min_sigma: 1.0e-5
 max_sigma: 80
