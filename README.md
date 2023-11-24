@@ -2,16 +2,29 @@
 
 ## Using this template
 This repository defines a cookiecutter template for quickly building new base repositories.
-To use this you first need to run 
+To use this on the cluster you first need to make a virtualenv on the login node and install cookiecutter. 
+
 ```
+python3 -m venv ~/venvs/cluster
+source ~/venvs/cluster/bin/activate
 pip install cookiecutter
 ```
-On baobab you will need to do this in a virtualenv.
+
 You can then run
 ```
-cookiecutter ssh://git@gitlab.cern.ch:7999/rodem/projects/projecttemplate.git
+cookiecutter git@github.com:sambklein/rodem_starter.git
 ```
-Follow the prompts to create your new project.
+And follow the prompts to create your new project.
+
+You can also clone the repository and then define a new instance as follows
+
+```
+git clone https://gitlab.cern.ch/rodem/projects/projecttemplate
+cookiecutter projecttemplate
+```
+
+This will define a new repository with the names that you defined.
+This repository will not by default by a git repo, and you will need to add this manually and set up a remote on gitlab.
 
 ## Introduction
 
