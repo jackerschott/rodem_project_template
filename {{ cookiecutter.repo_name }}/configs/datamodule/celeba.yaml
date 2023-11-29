@@ -1,4 +1,4 @@
-_target_: src.datamodules.images.ImageDataModule
+_target_: src.{{ cookiecutter.python_package }}.datamodules.images.ImageDataModule
 _convert_: object
 
 train_set:
