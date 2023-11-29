@@ -31,11 +31,18 @@ Ideally trainings should always be run using `python train.py experiment=...`
 
 ## Usage
 
+To quickly set up the repo with a single command run
+
+```
+chmod +777 setup.sh; ./setup.sh
+```
+
 To try out this template, follow these steps:
 
-1. Clone the repository and the mltools submodule:
+1. Make the project into a repository and add the mltools submodule:
 ```
-git clone --recursive https://gitlab.cern.ch/rodem/projects/projecttemplate.git
+git init
+git submodule add https://gitlab.cern.ch/mleigh/mltools.git
 ```
 2. Install the required packages:
 ```
@@ -45,8 +52,7 @@ pip install -r requirements.txt
 ```
 pip install -r mltools/requirements.txt
 ```
-4. Replace the paths and usernames in `configs/paths`
-5. Run the training script with the desired configuration:
+4. Run the training script with the desired configuration:
 ```
 python main.py experiment=generator.yaml
 ```
