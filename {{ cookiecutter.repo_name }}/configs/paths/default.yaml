@@ -1,7 +1,7 @@
 # output dir will be created by hydra
-data_dir: /home/matthew/Documents/data
+data_dir: {{ cookiecutter.data_dir }}
 output_dir: /home/matthew/Documents/saved_networks
-user: mleigh
+user: {{ cookiecutter.user }}
 
 # Interpolated
 root_dir: ${oc.env:PROJECT_ROOT}

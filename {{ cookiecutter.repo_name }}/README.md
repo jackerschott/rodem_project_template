@@ -34,7 +34,7 @@ Ideally trainings should always be run using `python train.py experiment=...`
 To quickly set up the repo with a single command run
 
 ```
-chmod +777 setup.sh; ./setup.sh
+chmod +777 setup_git.sh; ./setup_git.sh
 ```
 
 To try out this template, follow these steps:
