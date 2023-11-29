@@ -12,7 +12,7 @@ pip install cookiecutter
 
 You can then run
 ```
-cookiecutter git@github.com:sambklein/rodem_starter.git
+cookiecutter git clone https://${USERNAME}:${ACCESS_TOKEN}@gitlab.cern.ch/rodem/projects/projecttemplate
 ```
 And follow the prompts to create your new project.
 
