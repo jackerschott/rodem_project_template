@@ -3,5 +3,5 @@
     "repo_name": "{{ cookiecutter.project_name.strip().replace(' ', '-').replace('_', '-').lower() }}",
     "python_package": "{{ cookiecutter.project_name.strip().replace(' ', '_').replace('-', '_').lower() }}",
     "data_dir": "data",
-    "user": "saklein",
+    "wandb_user": "saklein"
 }
