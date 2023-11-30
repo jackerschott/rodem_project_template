@@ -7,20 +7,22 @@ To use this on the cluster you first need to make a virtualenv on the login node
 ```
 python3 -m venv ~/venvs/cluster
 source ~/venvs/cluster/bin/activate
-pip install cookiecutter
+pip install cookiecutter==2.5.0
 ```
 
 You can then run
 ```
-cookiecutter git clone https://${USERNAME}:${ACCESS_TOKEN}@gitlab.cern.ch/rodem/projects/projecttemplate
+cookiecutter https://${USERNAME}:${ACCESS_TOKEN}@gitlab.cern.ch/rodem/projects/projecttemplate
 ```
-And follow the prompts to create your new project.
+where `${USERNAME}` and `${ACCESS_TOKEN}` should be replaced by your gitlab username and accesstoken.
+Then follow the prompts to create your new project.
 
 You can also clone the repository and then define a new instance as follows
 
 ```
 git clone https://gitlab.cern.ch/rodem/projects/projecttemplate
 cookiecutter projecttemplate
+rm -rf projecttemplate
 ```
 
 This will define a new repository with the names that you defined.
