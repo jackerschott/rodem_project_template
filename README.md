@@ -17,16 +17,20 @@ cookiecutter https://${USERNAME}:${ACCESS_TOKEN}@gitlab.cern.ch/rodem/projects/p
 where `${USERNAME}` and `${ACCESS_TOKEN}` should be replaced by your gitlab username and accesstoken.
 Then follow the prompts to create your new project.
 
-You can also clone the repository and then define a new instance as follows
+If you want to clone this repo from your own branch, run
+```
+cookiecutter -c ${BRANCH_NAME} https://${USERNAME}:${ACCESS_TOKEN}@gitlab.cern.ch/rodem/projects/projecttemplate
+```
 
+You can also clone the repository and then define a new instance as follows
 ```
 git clone https://gitlab.cern.ch/rodem/projects/projecttemplate
 cookiecutter projecttemplate
 rm -rf projecttemplate
 ```
-
 This will define a new repository with the names that you defined.
 This repository will not by default by a git repo, and you will need to add this manually and set up a remote on gitlab.
+
 
 ## Introduction
 
