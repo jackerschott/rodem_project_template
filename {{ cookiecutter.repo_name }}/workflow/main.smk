@@ -54,6 +54,11 @@ rule predict:
         dataset = 'data.npz',
     output:
         plots = 'plots/predictions.pdf'
+    threads: 4
+    resources:
+        runtime = 15,
+        mem_mb = 1000,
+        slurm_extra = '--gpus=1'
     script:
         'scripts/predict.py'
 
@@ -63,12 +68,11 @@ rule train_model:
         dataset = 'data.npz',
     output:
         model = 'train_output/model_{i}.ckpt',
-        model = 'train_output/{dataset_fit}/model.ckpt'
     params:
-        checkpoints_path = 'train_output/{dataset_fit}/checkpoints',
-        wandb_run_id_path = 'train_output/{dataset_fit}/wandb_run_id',
-        wandb_run_name = lambda wildcards:
-            f'{experiment_id}/{wildcards.dataset_fit}',
+        checkpoints_path = 'train_output/checkpoints_{i}',
+        wandb_run_id_path = 'train_output/wandb_run_id_{i}',
+        wandb_run_name = f'{experiment_id}/{{i}}'
+    threads: 4
     resources:
         runtime = 60,
         mem_mb = 16000,
