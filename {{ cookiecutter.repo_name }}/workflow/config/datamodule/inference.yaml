@@ -1,0 +1,24 @@
+_target_: model_indep_unfolding.datamodules.simple.InferenceDataModule
+
+defaults:
+  - _self_
+
+preproc:
+  _target_: model_indep_unfolding.datamodules.preprocs.SimplePreprocessor
+
+train_loader_factory:
+  _target_: torch.utils.data.DataLoader
+  _partial_: True
+  batch_size: 1024
+  num_workers: 3
+  pin_memory: true
+
+predict_loader_factory:
+  _target_: torch.utils.data.DataLoader
+  _partial_: True
+  batch_size: 1024
+  num_workers: 3
+  pin_memory: true
+
+test_frac: 0.1
+val_frac: 0.1

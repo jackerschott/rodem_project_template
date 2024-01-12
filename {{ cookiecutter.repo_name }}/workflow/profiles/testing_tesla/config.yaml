@@ -1,0 +1,5 @@
+verbose: false
+printshellcmds: true
+use-singularity: false
+
+cores: 4

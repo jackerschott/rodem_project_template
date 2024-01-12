@@ -1,23 +1,11 @@
-# Directories
-__pycache__
-data/
-datasets/
-logs/
-outputs/
-plots/
-.vscode/
-container/
-slurmscripts/
-logs/
-wandb/
-latex/
-models/
-mpgan/
+.gitignore
 
-# File types
-*.pyc
-*.ipynb
-*.out
-*.sh
-*.log
-*workspace
+# python
+__pycache__/
+
+# results
+results/
+experiments/
+
+# invoke
+.invoke_state.json

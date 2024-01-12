@@ -1,0 +1,33 @@
+config:
+  method: bayes
+  name: null # gets set by snakemake
+  metric:
+    goal: minimize
+    name: valid_loss
+  parameters:
+    batch_size:
+      value: 1024
+    lr:
+      value: 1e-4
+    num_blocks:
+      values: [3, 6, 8, 10]
+    mlp_width:
+      values: [32, 64, 128, 256]
+    mlp_depth:
+      values: [3, 4, 5, 6]
+    bin_count:
+      values: [5, 10, 15, 20]
+    spline_bound:
+      value: 10
+
+param_config_keys:
+  batch_size: 'datamodule.train_loader_factory.batch_size'
+  lr: 'model.optimizer_factory.lr'
+  num_blocks: 'model.num_blocks'
+  mlp_width: 'model.mlp_width'
+  mlp_depth: 'model.mlp_depth'
+  bin_count: 'model.bin_count'
+  spline_bound: 'model.spline_bound'
+
+job_count: 10
+runs_per_job_count: 2

@@ -1,0 +1,14 @@
+defaults:
+  - _self_
+  - trainer: default
+  - model: inference_flow
+  - dataset: missing_info_toy
+  - datamodule: inference
+  - wandb: default
+  - sweep: all
+
+stage: 'experiment' # gets set by snakemake
+
+seed: 42
+precision: medium
+compile: null

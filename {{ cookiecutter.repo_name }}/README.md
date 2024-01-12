@@ -1,6 +1,6 @@
 <div align="center">
 
-# {{ cookiecutter.project_name }}
+# model_indep_unfolding
 
 [![python](https://img.shields.io/badge/-Python_3.11-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![pytorch](https://img.shields.io/badge/-PyTorch_2.1-EE4C2C?logo=pytorch&logoColor=white)](https://pytorch.org/)

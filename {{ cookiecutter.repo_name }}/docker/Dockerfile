@@ -1,29 +1,22 @@
-FROM pytorch/pytorch:2.1.0-cuda11.8-cudnn8-devel
+FROM pytorch/pytorch:2.1.1-cuda12.1-cudnn8-runtime
 
 ARG DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get -y update && \
-    apt-get -y upgrade && \
-    apt-get -y install \
+RUN apt -y update && \
+    apt -y upgrade && \
+    apt -y install \
         build-essential \
-        wget \
-        curl \
-        git \
-        make \
-        hdf5-tools \
-        gcc \
-        graphviz \
-        sudo \
         texlive \
+        texlive-latex-recommended \
         texlive-latex-extra \
         texlive-fonts-recommended \
-        dvipng
+        texlive-fonts-extra \
+        cm-super-minimal # needed for latex-support in matplotlib
 
 COPY requirements.txt .
 
 RUN conda update conda
-RUN conda update conda-build
 RUN conda install pip
 
-RUN python -m pip install --upgrade pip
-RUN python -m pip install --upgrade -r requirements.txt
+RUN pip install --upgrade pip
+RUN pip install --upgrade -r requirements.txt

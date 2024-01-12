@@ -1,0 +1,19 @@
+defaults:
+  - _self_
+  - dataset: missing_info_toy
+  - model: inference_flow
+
+  - datamodule: inference
+  - trainer: default
+  - trainer_predict: default
+  - wandb: default
+
+  - plot_template: hidden_pred_diff
+  - plot_target: monitor
+
+stage: 'experiment' # will get set from snakemake
+
+# used for training and predicting
+seed: 42
+precision: medium
+compile: null

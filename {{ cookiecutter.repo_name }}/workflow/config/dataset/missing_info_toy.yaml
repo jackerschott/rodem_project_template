@@ -1,0 +1,3 @@
+_target_: model_indep_unfolding.datamodules.datasets.MissingInfoToyDataset
+size: 1_000_000
+source: null

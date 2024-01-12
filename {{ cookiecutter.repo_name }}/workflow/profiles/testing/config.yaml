@@ -1,0 +1,10 @@
+verbose: false
+printshellcmds: true
+use-singularity: true
+singularity-args: >-
+  --nv
+  --cleanenv
+  --writable-tmpfs
+  --env PYTHONPATH=modules
+
+cores: 5

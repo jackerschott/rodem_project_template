@@ -1,3 +1,6 @@
 [submodule "mltools"]
 	path = mltools
 	url = https://gitlab.cern.ch/mleigh/mltools.git
+[submodule "normflows"]
+	path = normflows
+	url = https://github.com/VincentStimper/normalizing-flows
