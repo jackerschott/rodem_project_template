@@ -12,33 +12,36 @@ class InferenceFlow(L.LightningModule):
     network: nn.Module
     optimizer_factory: partial
 
-    def __init__(self, data_sample: Tuple[T.Tensor, T.Tensor],
-            num_blocks: int, mlp_width: int, mlp_depth: int,
-            bin_count: int, spline_bound: int, optimizer_factory: partial):
+    def __init__(self, data_sample: Tuple[T.Tensor, T.Tensor], conv_blocks_1: int,
+            conv_blocks_2: int, hidden_conv_channels: int, mlp_depth: int,
+            optimizer_factory: partial):
         super().__init__()
 
         self.save_hyperparameters(ignore=['data_sample', 'optimizer_factory'])
 
-        x, c = data_sample
-        assert x.dim() == 2 and x.shape[0] == 1 \
-            and c.dim() == 2 and c.shape[0] == 1
+        conv_block = T.Sequential(
+            nn.Conv2d(1, 8, 3),
+            nn.ReLU(),
+        )
 
-        base_dist = nf.distributions.base.DiagGaussian(x.shape[1], trainable=False)
-        if x.shape[1] > 1:
-            flows = []
-            for _ in range(num_blocks):
-                flows.append(nf.flows.CoupledRationalQuadraticSpline(
-                            x.shape[1], mlp_depth, mlp_width, c.shape[1], bin_count,
-                            spline_bound, nn.ReLU, init_identity=True))
-                flows.append(nf.flows.Permute(x.shape[1]))
-            self.network = nf.ConditionalNormalizingFlow(base_dist, flows)
-        else:
-            flows = []
-            for _ in range(num_blocks):
-                flows.append(nf.flows.AutoregressiveRationalQuadraticSpline(
-                            x.shape[1], mlp_depth, mlp_width, c.shape[1], bin_count,
-                            spline_bound, nn.ReLU, init_identity=True))
-            self.network = nf.ConditionalNormalizingFlow(base_dist, flows)
+        assert self.data_sample.shape[-1] == self.data_sample.shape[-2]
+        img_size = self.data_sample.shape[-1]
+
+        img_size_after_conv = (img_size - 2 * conv_blocks_1) / 2 + 2 * conv_blocks_2
+        mlp_width = img_size_after_conv**2 / hidden_conv_channels
+        assert img_size_after_conv**2 > 64
+        self.network = T.Sequential(
+            *[T.Sequential(nn.Conv2d(1, hidden_conv_channels, 3), nn.ReLU())
+                for _ in range(conv_counts_1)],
+            nn.MaxPool2d(2),
+            *[T.Sequential(nn.Conv2d(1, hidden_conv_channels, 3), nn.ReLU())
+                for _ in range(conv_counts_2)],
+            nn.Flatten(),
+            *[T.Sequential(nn.Linear(mlp_width, mlp_width), nn.ReLU())
+                for _ in range(mlp_depth)],
+            nn.Linear(mlp_width, 10),
+            nn.Sigmoid(),
+        )
 
         self.optimizer_factory = optimizer_factory
 
@@ -49,7 +52,7 @@ class InferenceFlow(L.LightningModule):
             batch_idx: int) -> T.Tensor:
         loss = self.network.forward_kld(*batch)
 
-        self.log('train_loss', loss, on_step=False,
+        self.log('train_loss', loss, on_step=True,
                 on_epoch=True, logger=True)
         return dict(loss=loss)
 
@@ -57,7 +60,7 @@ class InferenceFlow(L.LightningModule):
             batch_idx: int) -> None:
         loss = self.network.forward_kld(*batch)
 
-        self.log('valid_loss', loss, on_step=False,
+        self.log('valid_loss', loss, on_step=True,
                 on_epoch=True, prog_bar=True, logger=True)
 
     def test_step(self, batch, batch_idx, dataloader_idx=0):

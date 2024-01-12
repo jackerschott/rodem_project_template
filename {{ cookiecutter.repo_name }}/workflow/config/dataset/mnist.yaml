@@ -1,0 +1,2 @@
+_target_: model_indep_unfolding.datamodules.datasets.MNISTDataset
+size: 1_000

@@ -41,7 +41,8 @@ def main(cfg: DictConfig, dataset: str, model: str,
             data_sample=datamodule.get_data_sample(), **model_params)
 
     log.info('Instantiating the trainer')
-    trainer: L.Trainer = hydra.utils.instantiate(cfg.trainer, logger=None, callbacks=None)
+    trainer: L.Trainer = hydra.utils.instantiate(cfg.trainer,
+            logger=None, callbacks=None)
 
     log.info("Predicting")
     batches = trainer.predict(model, datamodule)

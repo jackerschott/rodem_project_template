@@ -4,5 +4,6 @@
     "python_package": "{{ cookiecutter.project_name.strip().replace(' ', '_').replace('-', '_').lower() }}",
     "data_dir": "data",
     "wandb_user": "saklein",
+    "wandb_project": "{{ cookiecutter.project_name.strip() }}",
     "full_name": "Samuel Klein"
 }

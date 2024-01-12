@@ -30,30 +30,29 @@ rule all:
 rule plot_roc:
     group: 'plotting'
     input:
-        prediction_1 = 'predictions/1.npz',
-        prediction_2 = 'predictions/2.npz',
+        prediction_1 = 'predictions/prediction_1.npz',
+        prediction_2 = 'predictions/prediction_2.npz',
     output:
-        plots = 'plots/roc.pdf',
+        plots = 'results/roc.pdf',
     script:
         'scripts/plot_roc.py'
 
 rule plot_predictions:
     group: 'plotting'
     input:
-        prediction_1 = 'predictions/1.npz',
+        prediction_1 = 'predictions/prediction_1.npz',
     output:
-        plots = 'plots/predictions.pdf',
+        plots = 'results/predictions.pdf',
     script:
         'scripts/plot_predictions.py'
 
 ### PREDICTING ###
 rule predict:
     input:
-    input:
         model = 'train_output/model_{i}.ckpt',
         dataset = 'data.npz',
     output:
-        plots = 'plots/predictions.pdf'
+        predictions = 'predictions/prediction_{i}.npz'
     threads: 4
     resources:
         runtime = 15,

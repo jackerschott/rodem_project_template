@@ -43,7 +43,7 @@ def train(log, cfg: DictConfig, dataset_path: str,
 
     log.info('Instantiating the datamodule')
     dataset = hydra.utils.instantiate(cfg.dataset,
-            source=None, size=None, load_path=dataset_path)
+            size=None, load_path=dataset_path)
     datamodule = hydra.utils.instantiate(cfg.datamodule,
             train_set=dataset, predict_set=None)
 

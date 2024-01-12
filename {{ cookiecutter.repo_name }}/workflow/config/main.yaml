@@ -1,6 +1,6 @@
 defaults:
   - _self_
-  - dataset: missing_info_toy
+  - dataset: mnist
   - model: inference_flow
 
   - datamodule: inference

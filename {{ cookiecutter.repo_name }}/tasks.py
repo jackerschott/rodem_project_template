@@ -58,7 +58,7 @@ class DevEnvironment:
         env = f'WANDB_API_KEY={wandb_api_key}'
 
         experiment_dir = conn.exp_env.get_experiment_dir(name, group)
-        tmux_cmd = f'tmux new-session -s {group}/{name} -c {experiment_dir}'
+        tmux_cmd = f'tmux new-session -s "{group}/{name}" -c "{experiment_dir}"'
         if conn.is_local('exp'):
             conn.run('dev', f'{env} exec {tmux_cmd}', pty=True)
         else:
@@ -133,7 +133,7 @@ class ExpEnvironment:
             f'--config {snakemake_cfg}',
         ]
         snakemake_opts = ' '.join(snakemake_opts)
-        conn.run('exp', f'PYTHONPATH={modules_dest}'
+        conn.run('exp', f'PYTHONPATH="{modules_dest}"'
                 f' snakemake {snakemake_opts} {other_snakemake_opts}', pty=True)
 
         if push_results:
@@ -281,18 +281,19 @@ def rsync(conn: Union[Context, Connection],
     if flow == 'to_remote':
         assert type(conn) is Connection
         conn.local(f'rsync -e "ssh -p {conn.port}" {opts} {excludes} ' \
-                f'{source} {conn.user}@{conn.host}:{target}')
+                f'"{source}" "{conn.user}@{conn.host}:{target}"')
     elif flow == 'from_remote':
         assert type(conn) is Connection
         conn.local(f'rsync -e "ssh -p {conn.port}" {opts} {excludes} ' \
-                f'{conn.user}@{conn.host}:{source} {target}')
+                f'"{conn.user}@{conn.host}:{source}" "{target}"')
     else:
         assert type(conn) is Context
-        conn.run(f'rsync {opts} {excludes} {source} {target}')
+        conn.run(f'rsync {opts} {excludes} "{source}" "{target}"')
 
 ### ENVIRONMENTS
 class TeslaDev(DevEnvironment):
-    ROOT_PATH = Path('/home/jona/studies/phd/flatprior/code')
+    ROOT_PATH = Path('/home/jona/studies/phd/'
+            'projecttemplate/template/{{ cookiecutter.repo_name }}')
     HOSTNAME = 'tesla'
     USER = 'jona'
     PORT = 22
@@ -321,7 +322,8 @@ class TeslaDev(DevEnvironment):
 
 class TeslaExp(ExpEnvironment):
     HOSTNAME = 'tesla'
-    EXPERIMENTS_DIR = Path('/home/jona/studies/phd/flatprior/code/experiments')
+    EXPERIMENTS_DIR = Path('/home/jona/studies/phd/'
+            'projecttemplate/template/{{ cookiecutter.repo_name }}/experiments')
 
     def is_local(self):
         return socket.gethostname() == self.HOSTNAME
@@ -332,7 +334,7 @@ class Baobab(ExpEnvironment):
     PORT = 22
     # make sure there are no symlinks here; this fucks up snakemake mounts otherwise
     EXPERIMENTS_DIR = Path('/srv/beegfs/scratch/users/a/ackersch/'
-            'projects/model_indep_unfolding/experiments')
+            'projects/template/{{ cookiecutter.repo_name }}/experiments')
 
     def is_local(self):
         return self.on_login_node() or self.on_compute_node()

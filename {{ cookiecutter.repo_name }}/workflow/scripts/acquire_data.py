@@ -14,8 +14,8 @@ logging.basicConfig(level=logging.INFO,
 log = logging.getLogger(__name__)
 
 @snakemake_main(globals().get('snakemake'))
-def main(cfg: DictConfig, dataset: str, dataset_source: str) -> None:
-    cfg.dataset.source = dataset_source
+def main(cfg: DictConfig, dataset: str) -> None:
+    print(cfg.dataset)
     dataset_to_acquire: Dataset = hydra.utils.instantiate(cfg.dataset)
 
     log.info('Acquiring data')

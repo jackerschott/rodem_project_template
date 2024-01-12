@@ -7,9 +7,11 @@ from torch.utils.data import DataLoader, TensorDataset, Subset, random_split
 from typing import Any, Optional, Literal, Union, Iterable, Tuple, Dict
 
 from .preprocs import Preprocessor
-from .datasets import Dataset, MissingInfoToyDataset
+from .datasets import Dataset
 
-class InferenceDataModule(L.LightningDataModule):
+import matplotlib.pyplot as plt
+
+class LabelledDigitsModule(L.LightningDataModule):
     train_set: Optional[Dataset]
     predict_set: Optional[Dataset]
     preproc: Preprocessor
@@ -38,21 +40,22 @@ class InferenceDataModule(L.LightningDataModule):
         self.split_fracs = dict(test=test_frac, val=val_frac)
         self.split_generator = T.Generator().manual_seed(split_seed)
 
-    def _preproc(self, x: NDArray, y: NDArray) -> Tuple[T.Tensor, T.Tensor]:
-            x_preproc = self.preproc.preprocess('hidden', x)
-            x_preproc = T.tensor(x_preproc, dtype=T.float)
+    def _preproc(self, labels: NDArray, digit_imgs: NDArray) \
+            -> Tuple[T.Tensor, T.Tensor]:
+        labels_preproc = self.preproc.preprocess('labels', labels)
+        labels_preproc = T.tensor(labels_preproc, dtype=T.float)
 
-            y_preproc = self.preproc.preprocess('visible', y)
-            y_preproc = T.tensor(y_preproc, dtype=T.float)
+        digit_imgs_preproc = self.preproc.preprocess('digit_imgs', digit_imgs)
+        digit_imgs_preproc = T.tensor(digit_imgs_preproc, dtype=T.float)
 
-            return x_preproc, y_preproc
+        return labels_preproc, digit_imgs_preproc
 
     def setup(self, stage: str):
         self.datasets = {}
 
         if stage == 'fit':
-            x_preproc, y_preproc = self._preproc(*self.train_set.get())
-            dataset = TensorDataset(x_preproc, y_preproc)
+            labels_preproc, digit_imgs_preproc = self._preproc(*self.train_set.get())
+            dataset = TensorDataset(labels_preproc, digit_imgs_preproc)
             
             split_fracs = list(self.split_fracs.values())
             split_fracs = [*split_fracs, 1 - sum(split_fracs)]
@@ -64,9 +67,8 @@ class InferenceDataModule(L.LightningDataModule):
             self.datasets['train'] = splits[-1]
         elif stage == 'test' or stage == 'predict' \
                 and self.predict_set == 'use_test':
-            _, y_preproc = self._preproc(*self.train_set.get())
-            base_samples = T.randn(y_preproc.shape)
-            dataset = TensorDataset(base_samples, y_preproc)
+            labels_preproc, digit_imgs_preproc = self._preproc(*self.train_set.get())
+            dataset = TensorDataset(labels_preproc, digit_imgs_preproc)
 
             split_fracs = list(self.split_fracs.values())
             split_fracs = [*split_fracs, 1 - sum(split_fracs)]
@@ -78,9 +80,8 @@ class InferenceDataModule(L.LightningDataModule):
             elif stage == 'predict':
                 self.datasets['predict'] = splits[i_test]
         elif stage == 'predict':
-            _, y_preproc = self._preproc(*self.predict_set.get())
-            base_samples = T.randn(y_preproc.shape)
-            self.datasets['predict'] = TensorDataset(base_samples, y_preproc)
+            labels_preproc, digit_imgs_preproc = self._preproc(*self.predict_set.get())
+            self.datasets['predict'] = TensorDataset(labels_preproc, digit_imgs_preproc)
 
     def train_dataloader(self) -> DataLoader:
         return self.train_loader_factory(self.datasets['train'], shuffle=True)
@@ -96,11 +97,12 @@ class InferenceDataModule(L.LightningDataModule):
 
     def get_data_sample(self) -> DataLoader:
         if not self.train_set is None:
-            x, y = self.train_set.get_init_sample()
-            return T.tensor(x), T.tensor(y)
+            label, digit_img = self.train_set.get_init_sample()
         else:
-            z, y = self.predict_set.get_init_sample()
-            return T.tensor(z), T.tensor(y)
+            label, digit_img = self.predict_set.get_init_sample()
+
+        label_preproc, digit_img_preproc = self._preproc(label, digit_img)
+        return T.tensor(label_preproc), T.tensor(digit_img_preproc)
             
     def invert_setup_on_prediction(self, batches: Iterable[T.Tensor]):
         pred = T.cat([batch for batch in batches]).numpy()
@@ -120,39 +122,27 @@ if __name__ == '__main__':
     from matplotlib.backends.backend_pdf import PdfPages
 
     from .preprocs import SimplePreprocessor
+    from .datasets import MNISTDataset
 
-    class TestDatamodule(unittest.TestCast):
+    class TestDatamodule(unittest.TestCase):
         def test_setup(self):
             preproc = SimplePreprocessor()
-            train_set = MissingInfoToyDataset('prior', 10_000)
+            train_set = MNISTDataset(10_000)
             train_set.acquire()
 
             train_loader_factory = partial(T.utils.data.DataLoader,
                     batch_size=1024, num_workers=1, pin_memory=True)
-            datamod = InferenceDataModule(preproc, train_set, None,
+            datamod = LabelledDigitsModule(preproc, train_set, None,
                     train_loader_factory, None, test_frac=0.1, val_frac=0.1)
             datamod.setup('fit')
 
             dataloader = datamod.train_dataloader()
 
-            x, y = train_set.get()
+            for _labels, _digit_imgs in dataloader:
+                label, digit_img = _labels[0], _digit_imgs[0, 0]
 
-            xy_preproc = T.cat([T.cat(batch, dim=-1) for batch in dataloader]).numpy()
-            x_preproc, y_preproc = xy_preproc[..., 0], xy_preproc[..., 1]
-
-            batches = [x for (x, y) in dataloader]
-            x_reco = datamod.invert_setup_on_prediction(batches)
-
-            fig, axs = plt.subplots(1, 2)
-
-            axs[0].hist(x, density=True, histtype='step', bins=40, color='C0')
-            axs[1].hist(y, density=True, histtype='step', bins=40, color='C0')
-
-            axs[0].hist(x_preproc, density=True, histtype='step', bins=40, color='C1')
-            axs[1].hist(y_preproc, density=True, histtype='step', bins=40, color='C1')
-
-            axs[0].hist(x_reco, density=True, histtype='step', bins=40, color='C2')
-            axs[1].hist(y, density=True, histtype='step', bins=40, color='C2')
+            print(label)
+            plt.imshow(digit_img)
             plt.show()
 
     unittest.main()
