@@ -45,10 +45,17 @@ class MNISTDataset(Dataset):
             load_path: Optional[str] = None) -> None:
         super().__init__(size, load_path)
 
-    def acquire(self) -> None:
-        with tempfile.TemporaryDirectory() as root_path:
-            train_set = datasets.MNIST(root_path, train=True, download=True)
-            test_set = datasets.MNIST(root_path, train=False, download=True)
+    def acquire(self, tmp_save_dir=None) -> None:
+        # tmp_save_dir is useful for testing to avoid re-downloading the dataset
+        # every time; in a real workflow the dataset should be cached manually with
+        # the save and load methods
+        if tmp_save_dir is None:
+            with tempfile.TemporaryDirectory() as root_path:
+                train_set = datasets.MNIST(root_path, train=True, download=True)
+                test_set = datasets.MNIST(root_path, train=False, download=True)
+        else:
+            train_set = datasets.MNIST(tmp_save_dir, train=True, download=True)
+            test_set = datasets.MNIST(tmp_save_dir, train=False, download=True)
 
         assert self.size <= len(train_set.targets) + len(test_set.targets)
         perm = np.random.permutation(self.size)
@@ -64,7 +71,7 @@ class MNISTDataset(Dataset):
 
     def get_init_sample(self) -> Tuple[NDArray, NDArray]:
         labels, digit_imgs = self.get()
-        return labels[0], digit_imgs[0]
+        return labels[:1], digit_imgs[:1]
 
     def save(self, filename: str) -> None:
         np.savez_compressed(filename, self.labels, self.digit_imgs)

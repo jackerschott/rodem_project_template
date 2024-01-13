@@ -4,6 +4,7 @@ import numpy as np
 import hydra
 import lightning as L
 from omegaconf import DictConfig
+from snakemake.script import Snakemake as SnakemakeContext
 import torch as T
 
 from mltools.snakemake import snakemake_main
@@ -14,8 +15,7 @@ logging.basicConfig(level=logging.INFO,
 log = logging.getLogger(__name__)
 
 @snakemake_main(globals().get('snakemake'))
-def main(cfg: DictConfig, dataset: str, model: str,
-        prediction: str, is_test: bool) -> None:
+def main(cfg: DictConfig, dataset: str, model: str, prediction: str) -> None:
     if cfg.seed:
         log.info(f'Setting seed to: {cfg.seed}')
         L.seed_everything(cfg.seed, workers=True)
@@ -24,14 +24,9 @@ def main(cfg: DictConfig, dataset: str, model: str,
     T.set_float32_matmul_precision(cfg.precision)
 
     log.info("Instantiating the datamodule")
-    dataset = hydra.utils.instantiate(cfg.dataset,
-            source=None, size=None, load_path=dataset)
-    if is_test:
-        datamodule = hydra.utils.instantiate(cfg.datamodule,
-                train_set=dataset, predict_set='use_test')
-    else:
-        datamodule = hydra.utils.instantiate(cfg.datamodule,
-                train_set=None, predict_set=dataset)
+    dataset = hydra.utils.instantiate(cfg.dataset, size=None, load_path=dataset)
+    datamodule = hydra.utils.instantiate(cfg.datamodule,
+            train_set=dataset, predict_set='use_test')
 
     log.info("Loading model from checkpoint")
     ModelClass = hydra.utils.get_class(cfg.model._target_)

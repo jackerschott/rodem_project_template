@@ -11,13 +11,18 @@ envvars:
 from pathlib import Path
 from mltools.snakemake import load_hydra_config
 
+LOADER_THREADS = 4
+
 experiment_path = Path(os.path.realpath('.'))
 experiment_id = f'{experiment_path.parent.name}/{experiment_path.name}'
+
 hydra_cfg = load_hydra_config('main')
 if 'resume_training' in config:
     hydra_cfg.resume_training = config['resume_training']
 hydra_cfg.stage = config['stage']
 hydra_cfg.wandb.api_key = os.environ['WANDB_API_KEY']
+hydra_cfg.datamodule.train_loader_factory.num_workers = LOADER_THREADS - 1
+hydra_cfg.datamodule.predict_loader_factory.num_workers = LOADER_THREADS - 1
 config = hydra_cfg
 
 ### ALL ###
@@ -52,8 +57,8 @@ rule predict:
         model = 'train_output/model_{i}.ckpt',
         dataset = 'data.npz',
     output:
-        predictions = 'predictions/prediction_{i}.npz'
-    threads: 4
+        prediction = 'predictions/prediction_{i}.npz'
+    threads: LOADER_THREADS
     resources:
         runtime = 15,
         mem_mb = 1000,
@@ -70,8 +75,8 @@ rule train_model:
     params:
         checkpoints_path = 'train_output/checkpoints_{i}',
         wandb_run_id_path = 'train_output/wandb_run_id_{i}',
-        wandb_run_name = f'{experiment_id}/{{i}}'
-    threads: 4
+        wandb_run_name = f'{experiment_id}/{{i}}',
+    threads: LOADER_THREADS
     resources:
         runtime = 60,
         mem_mb = 16000,

@@ -1,5 +1,6 @@
 from functools import partial
 import multiprocessing
+import numpy as np
 from numpy.typing import NDArray
 import lightning as L
 import torch as T
@@ -42,7 +43,11 @@ class LabelledDigitsModule(L.LightningDataModule):
 
     def _preproc(self, labels: NDArray, digit_imgs: NDArray) \
             -> Tuple[T.Tensor, T.Tensor]:
-        labels_preproc = self.preproc.preprocess('labels', labels)
+        # one-hot encoding can only be undone for 1 or 0 labels
+        # not for the network output; hence it doesn't belong in the preprocessor
+        labels_encoded = np.eye(10)[labels]
+
+        labels_preproc = self.preproc.preprocess('labels', labels_encoded)
         labels_preproc = T.tensor(labels_preproc, dtype=T.float)
 
         digit_imgs_preproc = self.preproc.preprocess('digit_imgs', digit_imgs)
@@ -102,11 +107,15 @@ class LabelledDigitsModule(L.LightningDataModule):
             label, digit_img = self.predict_set.get_init_sample()
 
         label_preproc, digit_img_preproc = self._preproc(label, digit_img)
-        return T.tensor(label_preproc), T.tensor(digit_img_preproc)
+        return label_preproc, digit_img_preproc
             
     def invert_setup_on_prediction(self, batches: Iterable[T.Tensor]):
-        pred = T.cat([batch for batch in batches]).numpy()
-        return self.preproc.unpreprocess('hidden', pred)
+        labels_pred = T.cat([x for x, _ in batches]).numpy()
+        labels_truth = T.cat([x for _, x in batches]).numpy()
+
+        labels_pred = self.preproc.unpreprocess('labels', labels_pred)
+        labels_truth = self.preproc.unpreprocess('labels', labels_truth)
+        return labels_pred, labels_truth
 
     def save(self, path) -> None:
         state = self._get_state_dict()
@@ -128,7 +137,7 @@ if __name__ == '__main__':
         def test_setup(self):
             preproc = SimplePreprocessor()
             train_set = MNISTDataset(10_000)
-            train_set.acquire()
+            train_set.acquire(tmp_save_dir='mnist')
 
             train_loader_factory = partial(T.utils.data.DataLoader,
                     batch_size=1024, num_workers=1, pin_memory=True)
@@ -139,10 +148,31 @@ if __name__ == '__main__':
             dataloader = datamod.train_dataloader()
 
             for _labels, _digit_imgs in dataloader:
-                label, digit_img = _labels[0], _digit_imgs[0, 0]
+                label, digit_img = _labels[0], _digit_imgs[0]
 
-            print(label)
-            plt.imshow(digit_img)
-            plt.show()
+            self.assertTrue(label.shape == (10,))
+            self.assertTrue(T.sum(label == 0.0) == 9 and T.sum(label == 1.0) == 1)
+
+            self.assertTrue(digit_img.shape == (1, 28, 28))
+            self.assertTrue(T.all((digit_img >= 0.0) & (digit_img <= 1.0)))
+            self.assertTrue(T.all((digit_img >= 0.0) & (digit_img <= 1.0)))
+
+        def test_get_data_sample(self):
+            preproc = SimplePreprocessor()
+            train_set = MNISTDataset(10_000)
+            train_set.acquire(tmp_save_dir='mnist')
+
+            train_loader_factory = partial(T.utils.data.DataLoader,
+                    batch_size=1024, num_workers=1, pin_memory=True)
+            datamod = LabelledDigitsModule(preproc, train_set, None,
+                    train_loader_factory, None, test_frac=0.1, val_frac=0.1)
+
+            label, digit_img = datamod.get_data_sample()
+            self.assertTrue(label.shape == (1, 10))
+            self.assertTrue(T.sum(label == 0.0) == 9 and T.sum(label == 1.0) == 1)
+
+            self.assertTrue(digit_img.shape == (1, 1, 28, 28))
+            self.assertTrue(T.all((digit_img >= 0.0) & (digit_img <= 1.0)))
+            self.assertTrue(T.all((digit_img >= 0.0) & (digit_img <= 1.0)))
 
     unittest.main()

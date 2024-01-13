@@ -7,6 +7,7 @@ import re
 import hydra
 import lightning as L
 from omegaconf import DictConfig
+from snakemake.script import Snakemake as SnakemakeContext
 import torch as T
 import wandb
 
@@ -79,8 +80,8 @@ def train(log, cfg: DictConfig, dataset_path: str,
     return trainer, model, datamodule
 
 @snakemake_main(globals().get('snakemake'))
-def main(cfg: DictConfig, dataset: str, model: str,
-        checkpoints_path: str, wandb_run_id_path: str, wandb_run_name: str) -> None:
+def main(cfg: DictConfig, dataset: str, model: str, checkpoints_path: str,
+        wandb_run_id_path: str, wandb_run_name: str) -> None:
     cfg.wandb.name = wandb_run_name
 
     wandb.login(key=cfg.wandb.api_key)

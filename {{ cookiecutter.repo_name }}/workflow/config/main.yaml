@@ -1,9 +1,9 @@
 defaults:
   - _self_
   - dataset: mnist
-  - model: inference_flow
+  - model: cnn
 
-  - datamodule: inference
+  - datamodule: labelled_digits
   - trainer: default
   - trainer_predict: default
   - wandb: default

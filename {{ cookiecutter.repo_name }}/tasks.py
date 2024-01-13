@@ -304,7 +304,7 @@ class TeslaDev(DevEnvironment):
 
     def module_paths(self):
         return [self.root_path() / m for m in [
-            'src/model_indep_unfolding', 'mltools/mltools', 'normflows/normflows'
+            'src/digit_classification', 'mltools/mltools', 'normflows/normflows'
         ]]
 
     @abstractmethod
