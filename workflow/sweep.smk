@@ -7,6 +7,8 @@ envvars:
 from pathlib import Path
 from mltools.snakemake import load_hydra_config
 
+LOADER_THREADS = 4
+
 experiment_path = Path(os.path.realpath('.'))
 experiment_id = f'{experiment_path.parent.name}/{experiment_path.name}'
 hydra_cfg = load_hydra_config('sweep')
@@ -15,6 +17,8 @@ hydra_cfg.wandb.api_key = os.environ['WANDB_API_KEY']
 hydra_cfg.wandb.name = experiment_id
 hydra_cfg.wandb.save_dir = '.'
 hydra_cfg.trainer.callbacks[0].dirpath = 'checkpoints'
+hydra_cfg.datamodule.train_loader_factory.num_workers = LOADER_THREADS - 1
+hydra_cfg.datamodule.predict_loader_factory.num_workers = LOADER_THREADS - 1
 config = hydra_cfg
 
 ### STOP SWEEP ###
@@ -42,6 +46,7 @@ rule train_sweep:
     params:
         checkpoints_base_path = 'train_output/checkpoints',
         trainer_default_root_dir = 'train_output',
+    threads: LOADER_THREADS # this also requests CPUs from slurm
     resources:
         runtime = 60,
         mem_mb = 16000,

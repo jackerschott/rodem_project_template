@@ -3,6 +3,8 @@ config:
   name: null # gets set by snakemake
   metric:
     goal: minimize
+    # careful, if you do self.log with both on_step and on_epoch,
+    # this might be valid_loss_epoch or valid_loss_step in stead of just valid_loss
     name: valid_loss
   parameters:
     batch_size:
@@ -28,5 +30,5 @@ param_config_keys:
   hidden_conv_channels: 'model.hidden_conv_channels'
   mlp_depth: 'model.mlp_depth'
 
-job_count: 1
-runs_per_job_count: 1
+job_count: 10
+runs_per_job_count: 2

@@ -59,7 +59,7 @@ class ConvClassifier(L.LightningModule):
         labels_pred = self.network(digit_imgs)
         loss = self.loss(labels_pred, labels)
 
-        self.log('train_loss', loss, on_step=True,
+        self.log('train_loss', loss, on_step=False,
                 on_epoch=True, logger=True)
         return dict(loss=loss)
 
@@ -69,7 +69,7 @@ class ConvClassifier(L.LightningModule):
         labels_pred = self.network(digit_imgs)
         loss = self.loss(labels_pred, labels)
 
-        self.log('valid_loss', loss, on_step=True,
+        self.log('valid_loss', loss, on_step=False,
                 on_epoch=True, prog_bar=True, logger=True)
 
     def test_step(self, batch, batch_idx, dataloader_idx=0):

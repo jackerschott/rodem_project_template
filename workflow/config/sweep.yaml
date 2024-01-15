@@ -5,7 +5,7 @@ defaults:
   - dataset: mnist
   - datamodule: labelled_digits
   - wandb: default
-  - sweep: all
+  - sweep: non_model_params
 
 stage: 'experiment' # gets set by snakemake
 
