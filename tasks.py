@@ -358,22 +358,22 @@ def experiment_setup(ctx: Context, name: str, group: str, remote=False):
     conn.dev_env.setup_experiment(conn, name, group)
 
 @task
-def experiment_attach(ctx: Context, name: str, group: str, local=False):
-    if local:
-        conn = EnvironmentConnection(ctx, TeslaDev(), TeslaExp())
-    else:
+def experiment_attach(ctx: Context, name: str, group: str, remote=False):
+    if remote:
         conn = EnvironmentConnection(ctx, TeslaDev(), Baobab())
+    else:
+        conn = EnvironmentConnection(ctx, TeslaDev(), TeslaExp())
     conn.dev_env.attach_to_experiment(conn, name, group)
 
 ### POPULATE
 @task
-def experiment_push(ctx: Context, name: str, group: str, local=False,
+def experiment_push(ctx: Context, name: str, group: str, remote=False,
         include_tasks: bool = True, include_workflow: bool = True,
         include_main_module: bool = True, include_other_modules: bool = True):
-    if local:
-        conn = EnvironmentConnection(ctx, TeslaDev(), TeslaExp())
-    else:
+    if remote:
         conn = EnvironmentConnection(ctx, TeslaDev(), Baobab())
+    else:
+        conn = EnvironmentConnection(ctx, TeslaDev(), TeslaExp())
 
     locals_vars = locals()
     includes = [name.removeprefix('include_') for name in local_vars
@@ -402,11 +402,11 @@ def experiment_populate(ctx: Context, include_tasks: bool = True,
     
 ### RESULTS
 @task
-def experiment_results_pull(ctx: Context, name: str, group: str, local=False):
-    if local:
-        conn = EnvironmentConnection(ctx, TeslaDev(), TeslaExp())
-    else:
+def experiment_results_pull(ctx: Context, name: str, group: str, remote=False):
+    if remote:
         conn = EnvironmentConnection(ctx, TeslaDev(), Baobab())
+    else:
+        conn = EnvironmentConnection(ctx, TeslaDev(), TeslaExp())
 
     conn.exp_env.push_experiment_results(conn, name, group)
 

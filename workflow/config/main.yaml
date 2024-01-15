@@ -9,7 +9,7 @@ defaults:
   - wandb: default
 
   - plot_template: roc_curve
-  - plot_target: paper
+  - plot_target: monitor
 
 stage: 'experiment' # will get set from snakemake
 

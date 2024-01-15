@@ -31,7 +31,9 @@ def main(cfg: DictConfig, *predictions: List[str],
         target = hydra.utils.instantiate(cfg.plot_target, fig_store=f)
 
         for digit in range(10):
-            fig = target.get_figure(1)
+            # use 3 figures per column to arrange
+            # ROC curves for 9 digits in a 3x3 grid
+            fig = target.get_figure(3)
             template.plot(fig, digit, labels_pred, labels_truth, pred_ids)
             target.save_figure(fig)
 

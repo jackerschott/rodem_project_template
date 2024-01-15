@@ -55,7 +55,7 @@ rule predict:
     threads: LOADER_THREADS
     resources:
         runtime = 15,
-        mem_mb = 1000,
+        mem_mb = 16000,
         slurm_extra = '--gpus=1'
     script:
         'scripts/predict.py'

@@ -102,7 +102,7 @@ class Paper(PlotTarget):
             fontsizes: Dict[str, float]) -> None:
         super().__init__(fig_store)
 
-        self.columnwidth = columnwidth_pt
+        self.columnwidth = columnwidth_pt / 72.27
 
         self.fontsizes = fontsizes
         self.font_code = '\n'.join([
