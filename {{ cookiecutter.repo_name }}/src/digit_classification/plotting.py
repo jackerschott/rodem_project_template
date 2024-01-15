@@ -56,7 +56,8 @@ class PlotTarget:
         plt.close(fig)
 
 class Monitor(PlotTarget):
-    def __init__(self, fig_store: FigureStore, monitor_width_mm: float) -> None:
+    def __init__(self, fig_store: FigureStore,
+            monitor_width_mm: float, fontsizes: Dict[str, float]) -> None:
         super().__init__(fig_store)
 
         # convert to meter then inch
@@ -65,8 +66,6 @@ class Monitor(PlotTarget):
         # Half the screen width is a reasonably natural size for plots
         self.columnwidth = monitor_width / 2
 
-        # empirically determined latex font sizes (in points)
-        # likely dependend on the specific setup used then
         self.fontsizes = dict(
             Huge = 24.88,
             huge = 24.88,
@@ -97,6 +96,32 @@ class Monitor(PlotTarget):
     def get_layout(self) -> mpl.layout_engine.LayoutEngine:
         return mpl.layout_engine.ConstrainedLayoutEngine(
                 h_pad=0.1, w_pad=0.1, hspace=0.05, wspace=0.05)
+
+class Paper(PlotTarget):
+    def __init__(self, fig_store: FigureStore, columnwidth_pt: float,
+            fontsizes: Dict[str, float]) -> None:
+        super().__init__(fig_store)
+
+        self.columnwidth = columnwidth_pt
+
+        self.fontsizes = fontsizes
+        self.font_code = '\n'.join([
+                r'\usepackage[bitstream-charter]{mathdesign}',
+                r'\usepackage[sfdefault]{AlegreyaSans}',
+                r'\usepackage{amsmath}',
+        ])
+        self.plot_label_size = self.fontsizes['large']
+        self.plot_legend_size = self.fontsizes['large']
+        self.plot_horizontal_gap = 0.0 
+        self.font_family = 'sans-serif'
+
+        self.height_ratio = 4/5
+
+        self._set_options()
+
+    def get_layout(self) -> mpl.layout_engine.LayoutEngine:
+        return mpl.layout_engine.ConstrainedLayoutEngine(
+                h_pad=0.0, w_pad=0.0, hspace=0.0, wspace=0.0)
 
 
 class RocCurveTemplate:

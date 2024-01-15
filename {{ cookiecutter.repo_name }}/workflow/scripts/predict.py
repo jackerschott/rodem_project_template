@@ -1,5 +1,6 @@
 import logging
 import numpy as np
+import tempfile
 
 import hydra
 import lightning as L
@@ -35,6 +36,9 @@ def main(cfg: DictConfig, dataset: str, model: str, prediction: str) -> None:
             optimizer_factory=cfg.model.optimizer_factory)
 
     log.info('Instantiating the trainer')
+    # we are just predicting, so we don't care about logs
+    with tempfile.TemporaryDirectory() as tempdir:
+        cfg.trainer.default_root_dir = tempdir
     trainer: L.Trainer = hydra.utils.instantiate(cfg.trainer,
             logger=None, callbacks=None)
 

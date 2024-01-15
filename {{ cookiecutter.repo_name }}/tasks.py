@@ -58,10 +58,10 @@ class DevEnvironment:
         env = f'WANDB_API_KEY={wandb_api_key}'
 
         experiment_dir = conn.exp_env.get_experiment_dir(name, group)
-        tmux_cmd = f'tmux new-session -s "{group}/{name}" -c "{experiment_dir}"'
         if conn.is_local('exp'):
-            conn.run('dev', f'{env} exec {tmux_cmd}', pty=True)
+            conn.run('dev', f'cd "{experiment_dir}" && {env} exec zsh', pty=True)
         else:
+            tmux_cmd = f'tmux new-session -s "{group}/{name}" -c "{experiment_dir}"'
             conn.ssh(f'{env} exec {tmux_cmd}')
 
     def attach_to_experiment(self, conn: 'EnvironmentConnection',
@@ -242,7 +242,7 @@ class EnvironmentConnection:
         if self.is_local(env):
             os.makedirs(path, exist_ok=True)
         else:
-            self.run(env, f'mkdir -p {path}')
+            self.run(env, f'mkdir -p "{path}"')
 
     def rsync(self, env_src: Literal['dev', 'exp'],
             env_target: Literal['dev', 'exp'], *args, **kwargs):
@@ -259,7 +259,7 @@ class EnvironmentConnection:
         assert self.is_local('dev')
         self.run('local', f'ssh -p {self.exp_env.PORT} -tR'
                 f' {self.dev_env.REVERSE_PORT}:localhost:{self.dev_env.PORT}'
-                f' {self.exp_env.host()} "{cmd}"', pty=True)
+                f' {self.exp_env.host()} '"'"f'{cmd}'"'"'', pty=True)
 
 
 def rsync(conn: Union[Context, Connection],
@@ -350,11 +350,11 @@ class Baobab(ExpEnvironment):
 
 ### SETUP
 @task
-def experiment_setup(ctx: Context, name: str, group: str, local=False):
-    if local:
-        conn = EnvironmentConnection(ctx, TeslaDev(), TeslaExp())
-    else:
+def experiment_setup(ctx: Context, name: str, group: str, remote=False):
+    if remote:
         conn = EnvironmentConnection(ctx, TeslaDev(), Baobab())
+    else:
+        conn = EnvironmentConnection(ctx, TeslaDev(), TeslaExp())
     conn.dev_env.setup_experiment(conn, name, group)
 
 @task
@@ -425,7 +425,7 @@ def experiment_results_push(ctx: Context):
 
 ### RUN
 @task
-def experiment_run(ctx: Context, workflow: str = 'main', profile: str = 'default',
+def experiment_run(ctx: Context, workflow: str = 'main', profile: str = 'test',
         snakemake_cfg: str = '', snakemake_opts: str = '',
         populate: bool = False, populate_tasks: bool = True,
         populate_workflow: bool = True, populate_main_module: bool = True,
@@ -445,5 +445,5 @@ def experiment_run(ctx: Context, workflow: str = 'main', profile: str = 'default
     else:
         populate_includes = [name.removeprefix('populate_') for name in local_vars
             if name.startswith('populate_') and local_vars[name]]
-    conn.exp_env.run_experiment(conn, workflow, profile, snakemake_cfg, snakemake_opts,
-            populate=populate_includes, push_results=push_results)
+    conn.exp_env.run_experiment(conn, workflow, profile, snakemake_cfg,
+            snakemake_opts, populate=populate_includes, push_results=push_results)

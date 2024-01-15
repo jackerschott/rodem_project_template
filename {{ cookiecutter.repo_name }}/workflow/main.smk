@@ -3,7 +3,7 @@
 # e.g. because of a symlink; snakemake will mount the current
 # directory incorrectly in this case
 container: '/home/users/a/ackersch/scratch/'
-    'projects/mnist_jona/experiment_env.sif'
+    'projects/template/experiment_env.sif'
 
 envvars:
     "WANDB_API_KEY"
@@ -71,7 +71,10 @@ rule train_model:
             HIDDEN_CONV_CHANNELS[int(wildcards.i) - 1],
         checkpoints_path = 'train_output/checkpoints_{i}',
         wandb_run_id_path = 'train_output/wandb_run_id_{i}',
-        wandb_run_name = f'{experiment_id}/{{i}}',
+        wandb_run_name = lambda wildcards:
+            f'{experiment_id}/{HIDDEN_CONV_CHANNELS[int(wildcards.i) - 1]}_channels',
+        wandb_save_dir = 'train_output',
+        trainer_default_root_dir = 'train_output',
     threads: LOADER_THREADS # this also requests CPUs from slurm
     resources:
         runtime = 60,

@@ -2,6 +2,6 @@ api_key: null # will get set from snakemake
 user: jackerschott
 project: '{{ cookiecutter.wandb_project }}'
 name: null # name of run, will get set from snakemake
-save_dir: '.'
+save_dir: null # will get set from snakemake
 tags:
   - ${stage}

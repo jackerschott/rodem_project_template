@@ -81,16 +81,20 @@ def train(log, cfg: DictConfig, dataset_path: str, model_path: str,
 
 @snakemake_main(globals().get('snakemake'))
 def main(cfg: DictConfig, dataset: str, model: str, hidden_conv_channels: int,
-        checkpoints_path: str, wandb_run_id_path: str, wandb_run_name: str) -> None:
+        checkpoints_path: str, wandb_run_id_path: str, wandb_run_name: str,
+        wandb_save_dir: str, trainer_default_root_dir: str) -> None:
     cfg.wandb.name = wandb_run_name
+    cfg.wandb.save_dir = wandb_save_dir
+    cfg.trainer.default_root_dir = trainer_default_root_dir
     cfg.model.hidden_conv_channels = hidden_conv_channels
 
     wandb.login(key=cfg.wandb.api_key)
     wandb_run_id = Path(wandb_run_id_path).read_text() \
         if os.path.exists(wandb_run_id_path) else None
     resume = 'must' if wandb_run_id else None
-    wandb.init(job_type='train', project=cfg.wandb.project, entity=cfg.wandb.user,
-            tags=cfg.wandb.tags, name=cfg.wandb.name, resume=resume, id=wandb_run_id)
+    wandb.init(job_type='train', dir=cfg.wandb.save_dir, project=cfg.wandb.project,
+            entity=cfg.wandb.user, tags=cfg.wandb.tags, name=cfg.wandb.name,
+            resume=resume, id=wandb_run_id)
     Path(wandb_run_id_path).write_text(wandb.run.id)
 
     train(log, cfg, dataset, model, checkpoints_path)

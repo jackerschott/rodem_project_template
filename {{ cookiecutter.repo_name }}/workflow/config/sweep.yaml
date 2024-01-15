@@ -1,14 +1,15 @@
 defaults:
   - _self_
   - trainer: default
-  - model: inference_flow
-  - dataset: missing_info_toy
-  - datamodule: inference
+  - model: cnn
+  - dataset: mnist
+  - datamodule: labelled_digits
   - wandb: default
   - sweep: all
 
 stage: 'experiment' # gets set by snakemake
 
+# used for training
 seed: 42
 precision: medium
 compile: null

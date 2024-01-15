@@ -1,5 +1,5 @@
 container: '/home/users/a/ackersch/scratch/'
-    'projects/model_indep_unfolding/experiment_env.sif'
+    'projects/template/experiment_env.sif'
 
 envvars:
     "WANDB_API_KEY"
@@ -35,12 +35,13 @@ rule stop_sweep:
 ### TRAINING ###
 rule train_sweep:
     input:
-        dataset = 'data/prior.npz',
+        dataset = 'data.npz',
         sweep_id = 'sweep_id',
     output:
         job_completion_marker = 'job_completion_markers/{job_idx}',
     params:
         checkpoints_base_path = 'train_output/checkpoints',
+        trainer_default_root_dir = 'train_output',
     resources:
         runtime = 60,
         mem_mb = 16000,
@@ -59,8 +60,6 @@ rule init_sweep:
 ### DATA ACQUISITION ###
 rule acquire_data:
     output:
-        dataset = 'data/prior.npz',
-    params:
-        dataset_source = 'prior',
+        dataset = 'data.npz',
     script:
         'scripts/acquire_data.py'

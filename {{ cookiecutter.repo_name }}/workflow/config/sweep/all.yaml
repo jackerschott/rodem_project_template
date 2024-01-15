@@ -6,28 +6,27 @@ config:
     name: valid_loss
   parameters:
     batch_size:
-      value: 1024
+      values: [512, 1024]
     lr:
-      value: 1e-4
-    num_blocks:
-      values: [3, 6, 8, 10]
-    mlp_width:
-      values: [32, 64, 128, 256]
+      distribution: log_uniform_values
+      min: 1e-5
+      max: 1e-3
+    conv_blocks_1:
+      value: 2
+    conv_blocks_2:
+      value: 2
+    hidden_conv_channels:
+      value: 8
     mlp_depth:
-      values: [3, 4, 5, 6]
-    bin_count:
-      values: [5, 10, 15, 20]
-    spline_bound:
-      value: 10
+      value: 3
 
 param_config_keys:
   batch_size: 'datamodule.train_loader_factory.batch_size'
   lr: 'model.optimizer_factory.lr'
-  num_blocks: 'model.num_blocks'
-  mlp_width: 'model.mlp_width'
+  conv_blocks_1: 'model.conv_blocks_1'
+  conv_blocks_2: 'model.conv_blocks_2'
+  hidden_conv_channels: 'model.hidden_conv_channels'
   mlp_depth: 'model.mlp_depth'
-  bin_count: 'model.bin_count'
-  spline_bound: 'model.spline_bound'
 
-job_count: 10
-runs_per_job_count: 2
+job_count: 1
+runs_per_job_count: 1

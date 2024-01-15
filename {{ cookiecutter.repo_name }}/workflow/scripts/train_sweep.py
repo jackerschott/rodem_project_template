@@ -33,7 +33,10 @@ def train_test_under_agent(cfg: DictConfig,
 
 @snakemake_main(globals().get('snakemake'))
 def main(cfg: DictConfig, dataset: str, sweep_id: str,
-        job_completion_marker: str, checkpoints_base_path: str) -> None:
+        job_completion_marker: str, checkpoints_base_path: str,
+        default_trainer_root_dir: str) -> None:
+    cfg.trainer.default_root_dir = default_trainer_root_dir
+
     wandb.login(key=cfg.wandb.api_key)
 
     sweep_id = Path(sweep_id).read_text()
