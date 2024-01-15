@@ -295,7 +295,7 @@ def rsync(conn: Union[Context, Connection],
 ### ENVIRONMENTS
 class TeslaDev(DevEnvironment):
     ROOT_PATH = Path('/home/jona/studies/phd/'
-            'projecttemplate/template/{{ cookiecutter.repo_name }}')
+            'projecttemplate/template/')
     HOSTNAME = 'tesla'
     USER = 'jona'
     PORT = 22
@@ -325,7 +325,7 @@ class TeslaDev(DevEnvironment):
 class TeslaExp(ExpEnvironment):
     HOSTNAME = 'tesla'
     EXPERIMENTS_DIR = Path('/home/jona/studies/phd/'
-            'projecttemplate/template/{{ cookiecutter.repo_name }}/experiments')
+            'projecttemplate/template/experiments')
 
     def is_local(self):
         return socket.gethostname() == self.HOSTNAME
@@ -336,7 +336,7 @@ class Baobab(ExpEnvironment):
     PORT = 22
     # make sure there are no symlinks here; this fucks up snakemake mounts otherwise
     EXPERIMENTS_DIR = Path('/srv/beegfs/scratch/users/a/ackersch/'
-            'projects/template/{{ cookiecutter.repo_name }}/experiments')
+            'projects/template/experiments')
 
     def is_local(self):
         return self.on_login_node() or self.on_compute_node()
