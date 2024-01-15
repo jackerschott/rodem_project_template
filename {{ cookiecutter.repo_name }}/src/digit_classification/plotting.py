@@ -1,12 +1,9 @@
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 from numpy.typing import NDArray
-from typing import Any, Dict, Tuple, Union, Optional, Protocol, cast
-
-# debug
 import scipy.constants as cs
-
-from .datamodules.datasets import Dataset
+from sklearn.metrics import roc_curve, auc
+from typing import Any, List, Dict, Tuple, Optional, Protocol
 
 class FigureStore(Protocol):
     def savefig(self, figure: Optional[plt.Figure] = None,
@@ -102,56 +99,40 @@ class Monitor(PlotTarget):
                 h_pad=0.1, w_pad=0.1, hspace=0.05, wspace=0.05)
 
 
-class PlotHiddenPredictionDiff:
-    feature_label_hidden: str
-    feature_label_visible: Optional[str]
-    bin_count: int
+class RocCurveTemplate:
+    def __init__(self, xlabel: str = 'False Positive Rate', ylabel: str = 'True Positive Rate'):
+        self.xlabel = xlabel
+        self.ylabel = ylabel
 
-    def __init__(self, bin_count: int, feature_label_hidden: str,
-            colors: Dict[str, str], feature_label_visible: Optional[str] = None) \
-            -> None:
-        self.bin_count = bin_count
-        self.feature_label_hidden = feature_label_hidden
-        self.feature_label_visible = feature_label_visible
-        self.colors = colors
+    def plot(self, fig: plt.Figure, digit: int, labels_pred: List[NDArray],
+            labels_truth: List[NDArray], pred_ids: List[str]):
+        # labels_pred.shape: (N, 10)
+        # labels_truth.shape: (N, 10)
+        assert digit in range(10)
 
-    def plot(self, fig: plt.Figure, prediction: Dict[str, NDArray],
-            data: Dict[str, Dataset]) -> None:
-        ax_hidden : plt.Axes
-        ax_visible : plt.Axes
-        if not self.feature_label_visible is None:
-            ax_hidden, ax_visible = fig.subplots(1, 2)
-        else:
-            ax_hidden = fig.subplots(1, 1)
+        ax = fig.subplots(1, 1)
 
-        for source in data:
-            x_truth, y = data[source].get()
-            x_truth = x_truth.reshape(-1)
-            y = y.reshape(-1)
+        for i in range(len(labels_pred)):
+            prob_pred = labels_pred[i][:, digit]
+            prob_truth = labels_truth[i][:, digit]
 
-            _, bins, patches = ax_hidden.hist(x_truth, histtype='step', density=True,
-                    bins=self.bin_count, label=source, linestyle='dashed',
-                    color=self.colors[source], range=(-1, 1))
-            source_color = patches[0].get_edgecolor()
+            fpr, tpr, _ = roc_curve(prob_truth, prob_pred)
+            area = auc(fpr, tpr)
+            ax.plot(fpr, tpr, label=f'{pred_ids[i]} (AUC = {area:.2f})')
+        
+        ax.plot([0, 1], [0, 1], color='lightgray', linestyle='--')
+        ax.set_xlim([0.0, 1.0])
+        ax.set_ylim([0.0, 1.0])
+        ax.set_xlabel(self.xlabel)
+        ax.set_ylabel(self.ylabel)
+        ax.set_title(f'Classification of Digit {digit}')
+        ax.legend(loc="lower right", frameon=False)
 
-            if not self.feature_label_visible is None:
-                ax_visible.hist(y, histtype='step', density=True,
-                        bins=self.bin_count, label=source, color=source_color)
+if __name__ == '__main__':
+    import unittest
 
-            if not source in prediction:
-                continue
-
-            x_pred = prediction[source].reshape(-1)
-            if not x_pred is None:
-                ax_hidden.hist(x_pred, histtype='step', density=True,
-                        bins=bins, label='pred', color=source_color, range=(-1, 1))
-
-        ax_hidden.set_xlabel(self.feature_label_hidden)
-        if not self.feature_label_visible is None:
-            assert not self.feature_label_visible is None
-            ax_visible.set_xlabel(self.feature_label_visible)
-
-        ax_hidden.set_ylabel('normalized density')
-
-        ax_hidden.legend()
-        ax_visible.legend()
+    class TestRocCurveTemplate(unittest.TestCase):
+        def test(self):
+            pass
+            
+    unittest.main()

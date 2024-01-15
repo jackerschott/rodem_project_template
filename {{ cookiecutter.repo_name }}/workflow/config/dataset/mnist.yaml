@@ -1,2 +1,2 @@
 _target_: digit_classification.datamodules.labelled_digits.datasets.MNISTDataset
-size: 1_000
+size: 70_000

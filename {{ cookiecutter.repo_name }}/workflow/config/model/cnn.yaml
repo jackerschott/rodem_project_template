@@ -2,7 +2,7 @@ _target_: digit_classification.models.cnn.conv_classifier.ConvClassifier
 
 conv_blocks_1: 2
 conv_blocks_2: 2
-hidden_conv_channels: 8
+hidden_conv_channels: null # gets set by snakemake
 mlp_depth: 3
 
 optimizer_factory:

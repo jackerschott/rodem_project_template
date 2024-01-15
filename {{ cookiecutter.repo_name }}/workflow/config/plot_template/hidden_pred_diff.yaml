@@ -1,8 +1,0 @@
-_target_: model_indep_unfolding.plotting.PlotHiddenPredictionDiff
-bin_count: 40
-feature_label_hidden: '$x_{\text{model}}, x_{\text{pred}}$'
-feature_label_visible: '$y_{\text{model}}$'
-colors:
-  prior: 'gray'
-  theory: 'darkblue'
-  data: 'darkred'

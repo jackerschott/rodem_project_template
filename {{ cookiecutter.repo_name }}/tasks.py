@@ -102,8 +102,8 @@ class ExpEnvironment:
     def modules_dest(self, experiment_dir: Path):
         return experiment_dir / "modules"
 
-    def plots_dest(self, experiment_dir: Path):
-        return experiment_dir / "plots"
+    def results_dest(self, experiment_dir: Path):
+        return experiment_dir / "results"
 
 
     def run_experiment(self, conn: 'EnvironmentConnection', workflow='main',
@@ -148,10 +148,12 @@ class ExpEnvironment:
         results_full_path = result_path / 'results_full.pdf'
         conn.run('dev', f'rm -f {results_full_path}')
 
-        plots_dir = self.plots_dest(self.get_experiment_dir(name, group))
-        conn.rsync('exp', 'dev', plots_dir, result_path, delete=True, copy_contents=True)
+        results_dest = self.results_dest(self.get_experiment_dir(name, group))
+        conn.rsync('exp', 'dev', results_dest, result_path,
+                delete=True, copy_contents=True)
 
-        conn.run('dev', f'pdfunite {result_path}/*.pdf {results_full_path}')
+        conn.run('dev', f'pdfunite "{result_path}/"*.pdf "{results_full_path}"')
+        print(f'generated {results_full_path.name}')
 
     def populate_experiment(self, conn: 'EnvironmentConnection',
             name: str, group: str, includes = List[str]):

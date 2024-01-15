@@ -1,2 +1,2 @@
-_target_: model_indep_unfolding.plotting.Monitor
+_target_: digit_classification.plotting.Monitor
 monitor_width_mm: 600

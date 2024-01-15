@@ -93,7 +93,7 @@ if __name__ == '__main__':
     from ...datamodules.labelled_digits.preprocs import SimplePreprocessor
     from ...datamodules.labelled_digits.datasets import MNISTDataset
 
-    class TestInferenceFlow(unittest.TestCase):
+    class TestConvClassifier(unittest.TestCase):
         def test_network(self):
             digit_imgs = T.rand(10, 1, 28, 28)
             labels = T.rand(10, 10)

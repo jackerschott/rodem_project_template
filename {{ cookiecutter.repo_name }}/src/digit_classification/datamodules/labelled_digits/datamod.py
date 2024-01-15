@@ -133,7 +133,7 @@ if __name__ == '__main__':
     from .preprocs import SimplePreprocessor
     from .datasets import MNISTDataset
 
-    class TestDatamodule(unittest.TestCase):
+    class TestLabelledDigitsModule(unittest.TestCase):
         def test_setup(self):
             preproc = SimplePreprocessor()
             train_set = MNISTDataset(10_000)

@@ -8,7 +8,7 @@ defaults:
   - trainer_predict: default
   - wandb: default
 
-  - plot_template: hidden_pred_diff
+  - plot_template: roc_curve
   - plot_target: monitor
 
 stage: 'experiment' # will get set from snakemake

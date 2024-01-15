@@ -30,10 +30,9 @@ def main(cfg: DictConfig, dataset: str, model: str, prediction: str) -> None:
 
     log.info("Loading model from checkpoint")
     ModelClass = hydra.utils.get_class(cfg.model._target_)
-    model_params = {key: cfg.model[key]
-        for key in cfg.model if not key == '_target_'}
     model = ModelClass.load_from_checkpoint(model,
-            data_sample=datamodule.get_data_sample(), **model_params)
+            data_sample=datamodule.get_data_sample(),
+            optimizer_factory=cfg.model.optimizer_factory)
 
     log.info('Instantiating the trainer')
     trainer: L.Trainer = hydra.utils.instantiate(cfg.trainer,

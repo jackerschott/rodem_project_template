@@ -32,8 +32,8 @@ def find_max_epoch_checkpoint(checkpoints_pattern: str, checkpoints_path: str):
             re.search(checkpoints_pattern, path).group(1))
     return Path(checkpoints_path) / max_filename
 
-def train(log, cfg: DictConfig, dataset_path: str,
-        model_path: str, checkpoints_path: str, auto_resume=True) \
+def train(log, cfg: DictConfig, dataset_path: str, model_path: str,
+        checkpoints_path: str, auto_resume=True) \
         -> (L.Trainer, L.LightningModule, L.LightningDataModule):
     if cfg.seed:
         log.info(f'Setting seed to: {cfg.seed}')
@@ -80,9 +80,10 @@ def train(log, cfg: DictConfig, dataset_path: str,
     return trainer, model, datamodule
 
 @snakemake_main(globals().get('snakemake'))
-def main(cfg: DictConfig, dataset: str, model: str, checkpoints_path: str,
-        wandb_run_id_path: str, wandb_run_name: str) -> None:
+def main(cfg: DictConfig, dataset: str, model: str, hidden_conv_channels: int,
+        checkpoints_path: str, wandb_run_id_path: str, wandb_run_name: str) -> None:
     cfg.wandb.name = wandb_run_name
+    cfg.model.hidden_conv_channels = hidden_conv_channels
 
     wandb.login(key=cfg.wandb.api_key)
     wandb_run_id = Path(wandb_run_id_path).read_text() \

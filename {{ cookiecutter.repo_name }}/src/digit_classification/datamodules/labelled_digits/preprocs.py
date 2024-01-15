@@ -43,7 +43,7 @@ class SimplePreprocessor(Preprocessor):
 if __name__ == '__main__':
     import unittest
 
-    class TestDatamodule(unittest.TestCase):
+    class TestSimplePreprocessor(unittest.TestCase):
         def test_consistency(self):
             preproc = SimplePreprocessor()
 

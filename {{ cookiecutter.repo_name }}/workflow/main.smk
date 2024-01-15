@@ -12,6 +12,7 @@ from pathlib import Path
 from mltools.snakemake import load_hydra_config
 
 LOADER_THREADS = 4
+HIDDEN_CONV_CHANNELS = [4, 8]
 
 experiment_path = Path(os.path.realpath('.'))
 experiment_id = f'{experiment_path.parent.name}/{experiment_path.name}'
@@ -28,28 +29,21 @@ config = hydra_cfg
 ### ALL ###
 rule all:
     input:
-        'results/roc.pdf',
-        'results/predictions.pdf',
+        'results/roc_curves.pdf',
 
 ### PLOTTING ###
-rule plot_roc:
+rule plot_roc_curves:
     group: 'plotting'
     input:
-        prediction_1 = 'predictions/prediction_1.npz',
-        prediction_2 = 'predictions/prediction_2.npz',
+        'predictions/prediction_1.npz',
+        'predictions/prediction_2.npz',
     output:
-        plots = 'results/roc.pdf',
+        roc_curves = 'results/roc_curves.pdf',
+    params:
+        pred_ids = [f'{n} conv channels'
+            for n in HIDDEN_CONV_CHANNELS],
     script:
         'scripts/plot_roc.py'
-
-rule plot_predictions:
-    group: 'plotting'
-    input:
-        prediction_1 = 'predictions/prediction_1.npz',
-    output:
-        plots = 'results/predictions.pdf',
-    script:
-        'scripts/plot_predictions.py'
 
 ### PREDICTING ###
 rule predict:
@@ -73,20 +67,21 @@ rule train_model:
     output:
         model = 'train_output/model_{i}.ckpt',
     params:
+        hidden_conv_channels = lambda wildcards:
+            HIDDEN_CONV_CHANNELS[int(wildcards.i) - 1],
         checkpoints_path = 'train_output/checkpoints_{i}',
         wandb_run_id_path = 'train_output/wandb_run_id_{i}',
         wandb_run_name = f'{experiment_id}/{{i}}',
-    threads: LOADER_THREADS
+    threads: LOADER_THREADS # this also requests CPUs from slurm
     resources:
         runtime = 60,
-        mem_mb = 16000,
+        mem_mb = 16000, # this also requests memory from slurm
         slurm_extra = '--gpus=1'
     script:
         'scripts/train.py'
 
 ### DATA ACQUISITION ###
 rule acquire_data:
-    group: 'data_acquisition'
     output:
         dataset = 'data.npz',
     script:
