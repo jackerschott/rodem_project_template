@@ -1,5 +1,14 @@
 stages:
+  - lint
   - build
+
+pre-commit:
+  stage: lint
+  image: python:3.10
+  script:
+    - python3 -m pip install pre-commit==3.4.0
+    - pre-commit run --all-files
+  allow_failure: True
 
 build_latest:
   stage: build
