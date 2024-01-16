@@ -3,6 +3,7 @@ torch
 lightning
 wandb
 normflows
+git+https://gitlab.cern.ch/mleigh/mltools@dev_jona
 
 # snakemake script debugging
 typer
@@ -15,6 +16,3 @@ matplotlib
 numpy
 scipy
 scikit-learn
-
-# needed for mltools
-rich

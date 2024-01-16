@@ -6,6 +6,7 @@ RUN apt -y update && \
     apt -y upgrade && \
     apt -y install \
         build-essential \
+        git \
         texlive \
         texlive-latex-recommended \
         texlive-latex-extra \
