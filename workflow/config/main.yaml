@@ -11,7 +11,7 @@ defaults:
   - plot_template: roc_curve
   - plot_target: monitor
 
-stage: 'experiment' # will get set from snakemake
+stage: null # will get set from snakemake
 
 # used for training and predicting
 seed: 42

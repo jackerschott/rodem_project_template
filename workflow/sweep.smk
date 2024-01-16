@@ -18,7 +18,6 @@ hydra_cfg.stage = config['stage']
 hydra_cfg.wandb.api_key = os.environ['WANDB_API_KEY']
 hydra_cfg.wandb.name = experiment_id
 hydra_cfg.wandb.save_dir = '.'
-hydra_cfg.trainer.callbacks[0].dirpath = 'checkpoints'
 hydra_cfg.datamodule.train_loader_factory.num_workers = LOADER_THREADS - 1
 hydra_cfg.datamodule.predict_loader_factory.num_workers = LOADER_THREADS - 1
 config = hydra_cfg
@@ -32,7 +31,7 @@ rule stop_sweep:
         # here; technically one could do this with the wandb run directories, but
         # they have unpredictable names and I don't want to consider internal wandb
         # stuff anything other than external state in the workflow
-        expand(f'{exp_path}/job_completion_markers/{{job_idx}}',
+        expand(exp_path + '/job_completion_markers/{job_idx}',
                 job_idx=range(config.sweep.job_count)),
         sweep_id = f'{exp_path}/sweep_id',
     script:
@@ -44,7 +43,7 @@ rule train_sweep:
         dataset = f'{exp_path}/data.npz',
         sweep_id = f'{exp_path}/sweep_id',
     output:
-        job_completion_marker = f'{exp_path}/job_completion_markers/{{job_idx}}',
+        job_completion_marker = exp_path + '/job_completion_markers/{job_idx}',
     params:
         checkpoints_base_path = f'{exp_path}/train_output/checkpoints',
         trainer_default_root_dir = f'{exp_path}/train_output',

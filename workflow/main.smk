@@ -53,11 +53,11 @@ rule plot_roc_curves:
 ### PREDICTING ###
 rule predict:
     input:
-        model = f'{exp_path}/train_output/model_{{i}}.ckpt',
+        model = exp_path + '/train_output/model_{i}.ckpt',
         dataset = f'{exp_path}/data.npz',
     output:
-        prediction = f'{exp_path}/predictions/prediction_{{i}}.npz'
-    log: f'{exp_path}/logs/predict_{{i}}.log'
+        prediction = exp_path + '/predictions/prediction_{i}.npz'
+    log: exp_path + '/logs/predict_{i}.log'
     threads: LOADER_THREADS
     resources:
         runtime = 15,
@@ -71,13 +71,13 @@ rule train_model:
     input:
         dataset = f'{exp_path}/data.npz',
     output:
-        model = f'{exp_path}/train_output/model_{{i}}.ckpt',
-    log: f'{exp_path}/logs/train_model_{{i}}.log'
+        model = exp_path + '/train_output/model_{i}.ckpt',
+    log: exp_path + '/logs/train_model_{i}.log'
     params:
         hidden_conv_channels = lambda wildcards:
             HIDDEN_CONV_CHANNELS[int(wildcards.i) - 1],
-        checkpoints_path = f'{exp_path}/train_output/checkpoints_{{i}}',
-        wandb_run_id_path = f'{exp_path}/train_output/wandb_run_id_{{i}}',
+        checkpoints_path = exp_path + '/train_output/checkpoints_{i}',
+        wandb_run_id_path = exp_path + '/train_output/wandb_run_id_{i}',
         wandb_run_name = lambda wildcards:
             f'{experiment_id}/{HIDDEN_CONV_CHANNELS[int(wildcards.i) - 1]}_channels',
         wandb_save_dir = f'{exp_path}/train_output',

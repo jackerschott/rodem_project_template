@@ -10,16 +10,10 @@ logging.basicConfig(level=logging.INFO,
         format="[%(filename)s] %(levelname)s: %(message)s")
 log = logging.getLogger(__name__)
 
-EXPERIMENT_BASE_DIR = Path('/home/users/a/ackersch/scratch/'
-        'projects/template/experiments')
-
 ### RUN
 @task
 def experiment_run(ctx: Context, name: str, group: str, workflow: str = 'main',
         profile: str = 'test', stage: str = 'debug', snakemake_args: str = ''):
-    experiment_dir = EXPERIMENT_BASE_DIR / group / name
-    os.makedirs(experiment_dir, exist_ok=True)
-
     workflows = [Path(p).stem for p in glob.glob('workflow/*.smk')]
     if not workflow in workflows:
         log.error(f'Workflow "{workflow}" not found.'
@@ -33,7 +27,7 @@ def experiment_run(ctx: Context, name: str, group: str, workflow: str = 'main',
         return
 
     snakemake_cmd = [
-        'PYTHONPATH=src:contrib',
+        'PYTHONPATH=src',
         'snakemake',
         f'--snakefile workflow/{workflow}.smk',
         f'--workflow-profile workflow/profiles/{profile}',
