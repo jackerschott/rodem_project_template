@@ -1,0 +1,9 @@
+{
+    "project_name": null,
+    "repo_name": "{{ cookiecutter.project_name.strip().replace(' ', '-').replace('_', '-').lower() }}",
+    "python_package": "{{ cookiecutter.project_name.strip().replace(' ', '_').replace('-', '_').lower() }}",
+    "your_name": null,
+    "wandb_username": null,
+    "wandb_projectname": "{{ cookiecutter.project_name }}",
+    "container_path": null
+}
