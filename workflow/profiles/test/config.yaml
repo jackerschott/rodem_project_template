@@ -1,11 +1,11 @@
 verbose: false
 printshellcmds: true
 
-use-apptainer: true
-apptainer-args: >-
+use-singularity: true
+singularity-args: >-
   --nv
   --cleanenv
   --writable-tmpfs
-  --env PYTHONPATH=modules
+  --env PYTHONPATH=src
 
 cores: 5

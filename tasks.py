@@ -27,7 +27,6 @@ def experiment_run(ctx: Context, name: str, group: str, workflow: str = 'main',
         return
 
     snakemake_cmd = [
-        'PYTHONPATH=src',
         'snakemake',
         f'--snakefile workflow/{workflow}.smk',
         f'--workflow-profile workflow/profiles/{profile}',

@@ -2,13 +2,13 @@ verbose: false
 printshellcmds: true
 jobs: 10
 
-use-apptainer: true
-apptainer-args: >-
+use-singularity: true
+singularity-args: >-
   --nv
   --cleanenv
-  --env PYTHONPATH=modules
+  --env PYTHONPATH=src
 
-executor: slurm
+slurm: true
 default-resources:
   slurm_account: golling
   slurm_partition: shared-gpu,private-dpnc-gpu
