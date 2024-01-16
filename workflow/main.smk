@@ -2,6 +2,9 @@
 # current working directory differs from os.path.realpath,
 # e.g. because of a symlink; snakemake will mount the current
 # directory incorrectly in this case
+# note that snakemake mounts all directories from sys.path into
+# the container, so effectively this only replaces the OS, not
+# the python environment
 container: '/home/users/a/ackersch/scratch/'
     'projects/template/experiment_env.sif'
 
@@ -14,8 +17,9 @@ from mltools.snakemake import load_hydra_config
 LOADER_THREADS = 4
 HIDDEN_CONV_CHANNELS = [4, 8]
 
-experiment_path = Path(os.path.realpath('.'))
-experiment_id = f'{experiment_path.parent.name}/{experiment_path.name}'
+exp_group, exp_name = config['exp_group'], config['exp_name']
+exp_path = f'experiments/{exp_group}/{exp_name}'
+experiment_id = f'{exp_group}/{exp_name}'
 
 hydra_cfg = load_hydra_config('main')
 if 'resume_training' in config:
@@ -29,16 +33,17 @@ config = hydra_cfg
 ### ALL ###
 rule all:
     input:
-        'results/roc_curves.pdf',
+        f'{exp_path}/results/roc_curves.pdf',
 
 ### PLOTTING ###
 rule plot_roc_curves:
     group: 'plotting'
     input:
-        'predictions/prediction_1.npz',
-        'predictions/prediction_2.npz',
+        f'{exp_path}/predictions/prediction_1.npz',
+        f'{exp_path}/predictions/prediction_2.npz',
     output:
-        roc_curves = 'results/roc_curves.pdf',
+        roc_curves = f'{exp_path}/results/roc_curves.pdf',
+    log: f'{exp_path}/logs/plot_roc_curves.log'
     params:
         pred_ids = [f'{n} conv channels'
             for n in HIDDEN_CONV_CHANNELS],
@@ -48,10 +53,11 @@ rule plot_roc_curves:
 ### PREDICTING ###
 rule predict:
     input:
-        model = 'train_output/model_{i}.ckpt',
-        dataset = 'data.npz',
+        model = f'{exp_path}/train_output/model_{{i}}.ckpt',
+        dataset = f'{exp_path}/data.npz',
     output:
-        prediction = 'predictions/prediction_{i}.npz'
+        prediction = f'{exp_path}/predictions/prediction_{{i}}.npz'
+    log: f'{exp_path}/logs/predict_{{i}}.log'
     threads: LOADER_THREADS
     resources:
         runtime = 15,
@@ -63,18 +69,19 @@ rule predict:
 ### TRAINING ###
 rule train_model:
     input:
-        dataset = 'data.npz',
+        dataset = f'{exp_path}/data.npz',
     output:
-        model = 'train_output/model_{i}.ckpt',
+        model = f'{exp_path}/train_output/model_{{i}}.ckpt',
+    log: f'{exp_path}/logs/train_model_{{i}}.log'
     params:
         hidden_conv_channels = lambda wildcards:
             HIDDEN_CONV_CHANNELS[int(wildcards.i) - 1],
-        checkpoints_path = 'train_output/checkpoints_{i}',
-        wandb_run_id_path = 'train_output/wandb_run_id_{i}',
+        checkpoints_path = f'{exp_path}/train_output/checkpoints_{{i}}',
+        wandb_run_id_path = f'{exp_path}/train_output/wandb_run_id_{{i}}',
         wandb_run_name = lambda wildcards:
             f'{experiment_id}/{HIDDEN_CONV_CHANNELS[int(wildcards.i) - 1]}_channels',
-        wandb_save_dir = 'train_output',
-        trainer_default_root_dir = 'train_output',
+        wandb_save_dir = f'{exp_path}/train_output',
+        trainer_default_root_dir = f'{exp_path}/train_output',
     threads: LOADER_THREADS # this also requests CPUs from slurm
     resources:
         runtime = 60,
@@ -86,6 +93,7 @@ rule train_model:
 ### DATA ACQUISITION ###
 rule acquire_data:
     output:
-        dataset = 'data.npz',
+        dataset = f'{exp_path}/data.npz',
+    log: f'{exp_path}/logs/acquire_data.log'
     script:
         'scripts/acquire_data.py'

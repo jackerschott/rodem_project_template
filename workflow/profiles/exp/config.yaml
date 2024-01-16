@@ -1,8 +1,9 @@
 verbose: false
 printshellcmds: true
 jobs: 10
-use-singularity: true
-singularity-args: >-
+
+use-apptainer: true
+apptainer-args: >-
   --nv
   --cleanenv
   --env PYTHONPATH=modules

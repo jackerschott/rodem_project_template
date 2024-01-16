@@ -16,7 +16,7 @@ EXPERIMENT_BASE_DIR = Path('/home/users/a/ackersch/scratch/'
 ### RUN
 @task
 def experiment_run(ctx: Context, name: str, group: str, workflow: str = 'main',
-        profile: str = 'test', snakemake_cfg: str = '', snakemake_args: str = ''):
+        profile: str = 'test', stage: str = 'debug', snakemake_args: str = ''):
     experiment_dir = EXPERIMENT_BASE_DIR / group / name
     os.makedirs(experiment_dir, exist_ok=True)
 
@@ -37,8 +37,7 @@ def experiment_run(ctx: Context, name: str, group: str, workflow: str = 'main',
         'snakemake',
         f'--snakefile workflow/{workflow}.smk',
         f'--workflow-profile workflow/profiles/{profile}',
-        f'--config {snakemake_cfg}',
-        f'--directory {experiment_dir}'
+        f'--config exp_name={name} exp_group={group} stage={stage}',
     ]
     snakemake_cmd = ' '.join(snakemake_cmd)
     ctx.run(f'{snakemake_cmd} {snakemake_args}', pty=True)

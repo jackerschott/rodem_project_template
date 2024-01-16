@@ -9,8 +9,10 @@ from mltools.snakemake import load_hydra_config
 
 LOADER_THREADS = 4
 
-experiment_path = Path(os.path.realpath('.'))
-experiment_id = f'{experiment_path.parent.name}/{experiment_path.name}'
+exp_group, exp_name = config['exp_group'], config['exp_name']
+exp_path = f'experiments/{exp_group}/{exp_name}'
+experiment_id = f'{exp_group}/{exp_name}'
+
 hydra_cfg = load_hydra_config('sweep')
 hydra_cfg.stage = config['stage']
 hydra_cfg.wandb.api_key = os.environ['WANDB_API_KEY']
@@ -30,22 +32,22 @@ rule stop_sweep:
         # here; technically one could do this with the wandb run directories, but
         # they have unpredictable names and I don't want to consider internal wandb
         # stuff anything other than external state in the workflow
-        expand('job_completion_markers/{job_idx}',
+        expand(f'{exp_path}/job_completion_markers/{{job_idx}}',
                 job_idx=range(config.sweep.job_count)),
-        sweep_id = 'sweep_id',
+        sweep_id = f'{exp_path}/sweep_id',
     script:
         'scripts/stop_sweep.py'
 
 ### TRAINING ###
 rule train_sweep:
     input:
-        dataset = 'data.npz',
-        sweep_id = 'sweep_id',
+        dataset = f'{exp_path}/data.npz',
+        sweep_id = f'{exp_path}/sweep_id',
     output:
-        job_completion_marker = 'job_completion_markers/{job_idx}',
+        job_completion_marker = f'{exp_path}/job_completion_markers/{{job_idx}}',
     params:
-        checkpoints_base_path = 'train_output/checkpoints',
-        trainer_default_root_dir = 'train_output',
+        checkpoints_base_path = f'{exp_path}/train_output/checkpoints',
+        trainer_default_root_dir = f'{exp_path}/train_output',
     threads: LOADER_THREADS # this also requests CPUs from slurm
     resources:
         runtime = 60,
@@ -56,7 +58,7 @@ rule train_sweep:
 
 rule init_sweep:
     output:
-        sweep_id = 'sweep_id',
+        sweep_id = f'{exp_path}/sweep_id',
     params:
         sweep_name = experiment_id,
     script:
@@ -65,6 +67,6 @@ rule init_sweep:
 ### DATA ACQUISITION ###
 rule acquire_data:
     output:
-        dataset = 'data.npz',
+        dataset = f'{exp_path}/data.npz',
     script:
         'scripts/acquire_data.py'

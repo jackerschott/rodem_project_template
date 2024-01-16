@@ -1,7 +1,8 @@
 verbose: false
 printshellcmds: true
-use-singularity: true
-singularity-args: >-
+
+use-apptainer: true
+apptainer-args: >-
   --nv
   --cleanenv
   --writable-tmpfs
