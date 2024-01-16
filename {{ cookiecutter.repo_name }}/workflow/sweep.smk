@@ -1,5 +1,4 @@
-container: '/home/users/a/ackersch/scratch/'
-    'projects/template/experiment_env.sif'
+container: '{{ cookiecutter.container_path }}'
 
 envvars:
     "WANDB_API_KEY"

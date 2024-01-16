@@ -5,8 +5,7 @@
 # note that snakemake mounts all directories from sys.path into
 # the container, so effectively this only replaces the OS, not
 # the python environment
-container: '/home/users/a/ackersch/scratch/'
-    'projects/template/experiment_env.sif'
+container: '{{ cookiecutter.container_path }}'
 
 envvars:
     "WANDB_API_KEY"
