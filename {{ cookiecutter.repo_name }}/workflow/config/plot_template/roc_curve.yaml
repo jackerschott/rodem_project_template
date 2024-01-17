@@ -1,1 +1,1 @@
-_target_: digit_classification.plotting.RocCurveTemplate
+_target_: {{ cookiecutter.python_package }}.plotting.RocCurveTemplate

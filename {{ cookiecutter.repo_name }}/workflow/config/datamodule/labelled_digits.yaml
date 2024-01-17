@@ -1,11 +1,11 @@
-_target_: "digit_classification.datamodules\
+_target_: "{{ cookiecutter.python_package }}.datamodules\
   .labelled_digits.datamod.LabelledDigitsModule"
 
 defaults:
   - _self_
 
 preproc:
-  _target_: "digit_classification.datamodules\
+  _target_: "{{ cookiecutter.python_package }}.datamodules\
     .labelled_digits.preprocs.SimplePreprocessor"
 
 train_loader_factory:
