@@ -1,65 +1,87 @@
 <div align="center">
 
-# model_indep_unfolding
+# Digit Classification
 
 [![python](https://img.shields.io/badge/-Python_3.11-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![pytorch](https://img.shields.io/badge/-PyTorch_2.1-EE4C2C?logo=pytorch&logoColor=white)](https://pytorch.org/)
 [![lightning](https://img.shields.io/badge/-Lightning_2.1-792EE5?logo=lightning&logoColor=white)](https://lightning.ai/)
 [![hydra](https://img.shields.io/badge/-Hydra_1.3-89b8cd&logoColor=white)](https://hydra.cc/)
 [![wandb](https://img.shields.io/badge/-WandB_0.16-orange?logo=weightsandbiases&logoColor=white)](https://wandb.ai)
+[![snakemake](https://img.shields.io/badge/-Snakemake_7.32.4-039475)](https://snakemake.readthedocs.io/)
+[![invoke](https://img.shields.io/badge/-Invoke_2.2.0-yellow)](https://www.pyinvoke.org/)
 </div>
 
-This project is generated from the RODEM template for training deep learning models using PyTorch, Lightning, Hydra, and WandB. It is loosely based on the PyTorch Lightning Hydra template by ashleve.
-
-The example network in this template is a generative diffusion model for MNIST using the EDM framework.
-
-## Submodules
-
-The example project in this template relies on a custom submodule called `mltools`.
-This is a collection of useful functions, layers and networks for deep learning developed by the RODEM group at UNIGE.
-
-[MLTools Repo](https://gitlab.cern.ch/mleigh/mltools/-/tree/master)
-
-## Configuration
-
-All job configuration is handled by hydra and omegaconf and are stored in the `configs` directory.
-The main configuration file that composes training is `train.yaml`.
-It sets the seed for reproducibility, the project and network names, the checkpoint path for resuming training, precision and compile options for PyTorch, and tags for the loggers.
-This file composes the training config using yaml files for the `trainer`, `model`, `datamodule`, `loggers`, `paths`, `callbacks`.
-The `experiment` folder is used to overwite any of the config values before composition.
-Ideally trainings should always be run using `python train.py experiment=...`
+This is an example application of the RODEM machine learning template, using a
+CNN classifier for MNIST digit classification.
+It relies on pytorch and lightning for machine learning, wandb for experiment
+tracking, hydra for configuration management, snakemake for workflow management
+and invoke as a project cli.
 
 ## Usage
 
-To quickly set up the repo with a single command run
+After cloning the repo
+```
+git clone https://gitlab.cern.ch/rodem/projects/projecttemplate/ <repo_name>
+cd <repo_name>
+```
+to run the example workflows in this repo on an HPC cluster with slurm installed,
+start by setting up a virtual environment:
+```
+python -m venv <env_path>
+source <env_path>/bin/activate
+pip install --upgrade pip
+pip install -r workflow_requirements.txt
+```
+You might have to make sure that your python version, with which you setup the
+environment, is high enough.
 
+Next make your wandb api key available, by copy-pasting it after running
 ```
-chmod +777 setup_git.sh; ./setup_git.sh
+read -s WANDB_API_KEY; export WANDB_API_KEY
 ```
 
-To try out this template, follow these steps:
+Now we can start the actual workflow.
+This could be done with snakemake directly, but is a bit more convenient with invoke.
+The latter simply provides a python wrapper around snakemake in `tasks.py` which neatly
+documents the actually used commands and flags.
+To run the main workflow with invoke type
+```
+inv experiment-run --name=<exp_name> --group=<exp_group> --profile=exp --stage=experiment
+```
+where `<exp_name>` and `<exp_group>` are mainly used to define the output directory of
+the experiment we want to run, which will be `experiments/<exp_group>/<exp_name>`.
+The profiles are defined in `workflow/profiles/` and are used to set specific snakemake
+flags.
+Two profiles are provided, `exp` and `test`, which run a workflow either as automatically
+launched slurm jobs or in an interactive session, where parallelization is solely done
+through CPU cores.
+Finally, we can use the stage flag to indicate if this is actually a serious
+experiment or if we are just debugging (`--stage=debug`).
+Here this only sets an appropriate tag for the wandb run.
+Now, invoke will call snakemake under the hood, which in turn runs the
+workflow defined in `workflow/main.smk`:
 
-1. Make the project into a repository and add the mltools submodule:
+![DAG](dag.png)
+
+As you can see, this workflow will train two models, which differ by the number of hidden channels
+in the convolution layers, predict labels from both models and plot ROC curves.
+The all rule is simply the last rule and defines all output files that should be present.
+The resulting plots can be found in `experiments/<exp_group>/<exp_name>/results/roc_curves.pdf`.
+
+This repository also comes with an example sweep workflow, which uses
+wandb sweeps to make a hyperparameter search.
+To execute this one, run
 ```
-git init
-git submodule add https://gitlab.cern.ch/mleigh/mltools.git
+inv experiment-run --workflow=sweep --name=<exp_name> --group=<exp_group> --profile=exp --stage=experiment
 ```
-2. Install the required packages:
-```
-pip install -r requirements.txt
-```
-3. Install the required packages for mltools:
-```
-pip install -r mltools/requirements.txt
-```
-4. Run the training script with the desired configuration:
-```
-python main.py experiment=generator.yaml
-```
+where we only added `--workflow=sweep` to the previous command.
+This will launch a hyperparameter search over previously defined parameters
+in `workflow/config/sweep.yaml` and save the results with wandb.
 
 ## Docker and Gitlab
 
-This project is setup to use the CERN GitLab CI/CD to automatically build a Docker image based on the `docker/Dockerfile` and `requirements.txt`.
+This project is setup to use the CERN GitLab CI/CD to automatically build a Docker image based
+on the `docker/Dockerfile` and `requirements.txt`.
 It will also run the pre-commit as part of the pipeline.
 To edit this behaviour change `.gitlab-ci`
 
@@ -70,4 +92,4 @@ Please use the provided `pre-commit` before making merge requests!
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](https://gitlab.cern.ch/rodem/projects/projecttemplate/blob/main/LICENSE) file for details.
+This project is licensed under the MIT License. See the LICENSE file for details.
