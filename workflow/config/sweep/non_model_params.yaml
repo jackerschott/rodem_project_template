@@ -30,5 +30,5 @@ param_config_keys:
   hidden_conv_channels: 'model.hidden_conv_channels'
   mlp_depth: 'model.mlp_depth'
 
-job_count: 10
-runs_per_job_count: 2
+job_count: 2
+runs_per_job_count: 1
