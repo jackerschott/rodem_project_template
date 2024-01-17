@@ -38,7 +38,7 @@ source <env_path>/bin/activate
 pip install --upgrade pip
 pip install cookiecutter
 ```
-Note that you typically want to reuse this environment for installing the
+This environment can and should be reused for installing the
 workflow requirements as described in the project readme.
 
 Now we can run
@@ -50,6 +50,10 @@ To use a specific branch:
 ```
 cookiecutter -c <branch> https://${USERNAME}:${ACCESS_TOKEN}@gitlab.cern.ch/rodem/projects/projecttemplate
 ```
+Note that cookiecutter will ask you for a container path.
+The corresponding container is supposed to be build by the provided Dockerfile
+and gitlab CI and pulled to the provided path later.
+Naturally the container path can always be changed by editing `workflow/main.smk` and `workflow/sweep.smk`.
 
 You can also clone the repository and then define a new instance as follows
 ```
