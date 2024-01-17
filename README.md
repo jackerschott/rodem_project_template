@@ -2,8 +2,10 @@
 
 ## Introduction
 
-This README describes typical workflows and the goals the template should serve.
-The README in the project itself provides instruction on how the template is designed to be used.
+This repository serves as a template for a typical research machine learning workflow.
+It is loosely based on the PyTorch Lightning Hydra template by ashleve.
+The basic usage and goals off this template are described in the following.
+The README in the project itself provides more detailed usage instructions.
 
 ## Typical workflow
 1) Research and development:
