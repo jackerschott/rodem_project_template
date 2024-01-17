@@ -26,3 +26,7 @@ build_latest:
       --context "${CI_PROJECT_DIR}"
       --dockerfile "${DOCKER_FILE}"
       --destination "${TO}"
+  rules:
+    - changes:
+      - docker/Dockerfile
+      - requirements.txt
