@@ -16,6 +16,7 @@ CNN classifier for MNIST digit classification.
 It relies on pytorch and lightning for machine learning, wandb for experiment
 tracking, hydra for configuration management, snakemake for workflow management
 and invoke as a project cli.
+Furthermore it uses [MLTools](https://gitlab.cern.ch/mleigh/mltools/) for certain helper functions.
 
 ## Usage
 
