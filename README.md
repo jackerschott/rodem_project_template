@@ -50,18 +50,31 @@ To use a specific branch:
 ```
 cookiecutter -c <branch> https://${USERNAME}:${ACCESS_TOKEN}@gitlab.cern.ch/rodem/projects/projecttemplate
 ```
-Note that cookiecutter will ask you for a container path.
-The corresponding container is supposed to be build by the provided Dockerfile
-and gitlab CI and pulled to the provided path later.
-Naturally the container path can always be changed by editing `workflow/main.smk` and `workflow/sweep.smk`.
-
 You can also clone the repository and then define a new instance as follows
 ```
 git clone https://gitlab.cern.ch/rodem/projects/projecttemplate
 cookiecutter projecttemplate
 ```
-This will define a new repository with the names that you defined.
-This repository will not by default by a git repo, and you will need to add this manually and set up a remote on gitlab.
+Note that cookiecutter will ask you for a container path.
+The corresponding container is supposed to be build by the provided Dockerfile
+and gitlab CI and pulled to the provided path later.
+Naturally the container path can always be changed by editing `workflow/main.smk` and `workflow/sweep.smk`.
+
+Afterwards you will be left with a new repository using the values you entered.
+This repository will not by default be a git repository, so you want to
+initialize one, setup a gitlab repository and push.
+This will also automatically launch a gitlab pipeline to build a container,
+using the provided Dockerfile.
+
+After the pipeline is done you want to pull the container
+```
+apptainer pull --docker-login <container_path> <gitlab_repo_url>/docker-image:latest
+```
+where `<gitlab_repo_url>` should be replaced with the url to your newly created
+gitlab repo and `<container_path>` with the path you entered previously.
+
+This concludes the setup.
+For instructions on how to run experiments, you can check out the README inside the project.
 
 ## Contributing
 
