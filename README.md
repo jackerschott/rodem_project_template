@@ -36,25 +36,22 @@ After cloning the repo
 git clone https://gitlab.cern.ch/rodem/projects/projecttemplate/ <repo_name>
 cd <repo_name>
 ```
-start by setting up a new virtual environment on an HPC cluster with slurm installed:
+start by setting up a new virtual environment on an HPC cluster with slurm and
+install cookiecutter:
 ```
 python3 -m venv <env_path>
 source <env_path>/bin/activate
 pip install --upgrade pip
-pip install -r requirements.txt
+pip install cookiecutter
 ```
-This will install cookiecutter, snakemake and some other packages needed for the
-workflows defined in the template.
+Note that you typically want to reuse this environment for installing the
+workflow requirements as described in the project readme.
 
 Now we can run
 ```
-cookiecutter git clone https://gitlab.cern.ch/rodem/projects/projecttemplate
-```
-And follow the prompts to create your new project.
-Note that you might need to add your username and access token here:
-```
 cookiecutter git clone https://${USERNAME}:${ACCESS_TOKEN}@gitlab.cern.ch/rodem/projects/projecttemplate
 ```
+And follow the prompts to create your new project.
 
 You can also clone the repository and then define a new instance as follows
 ```
