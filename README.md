@@ -60,3 +60,12 @@ cookiecutter projecttemplate
 ```
 This will define a new repository with the names that you defined.
 This repository will not by default by a git repo, and you will need to add this manually and set up a remote on gitlab.
+
+## Contributing
+
+Contributions are welcome! Please submit a pull request or create an issue if you have any improvements or suggestions.
+Note that the `master` branch is nothing but a few commits on top of the `example` branch that
+"cookiecutterizes" everything. 
+So for almost all development you want to use the example branch and rebase the
+master branch onto it.
+Also, please use the provided `pre-commit` before making merge requests!
