@@ -1,4 +1,4 @@
-_target_: digit_classification.models.cnn.conv_classifier.ConvClassifier
+_target_: {{ cookiecutter.python_package }}.models.cnn.conv_classifier.ConvClassifier
 
 conv_blocks_1: 2
 conv_blocks_2: 2

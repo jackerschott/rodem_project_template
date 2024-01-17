@@ -1,4 +1,4 @@
-_target_: digit_classification.plotting.Monitor
+_target_: {{ cookiecutter.python_package }}.plotting.Monitor
 monitor_width_mm: 600
 # empirically determined latex font sizes (in points)
 # likely dependend on the specific setup used then

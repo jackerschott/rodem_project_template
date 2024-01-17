@@ -1,4 +1,4 @@
-_target_: digit_classification.plotting.Paper
+_target_: {{ cookiecutter.python_package }}.plotting.Paper
 # emprically determined latex column size (in points)
 # dependend on the specific setup used then
 columnwidth_pt: 426.79135

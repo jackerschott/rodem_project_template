@@ -1,2 +1,2 @@
-_target_: digit_classification.datamodules.labelled_digits.datasets.MNISTDataset
+_target_: {{ cookiecutter.python_package }}.datamodules.labelled_digits.datasets.MNISTDataset
 size: 70_000
