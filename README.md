@@ -22,7 +22,7 @@ Furthermore it uses [MLTools](https://gitlab.cern.ch/mleigh/mltools/) for certai
 
 After cloning the example branch of this repo:
 ```
-git clone -b example https://gitlab.cern.ch/rodem/projects/projecttemplate/ <repo_name>
+git clone -b example https://${USERNAME}:${ACCESSTOKEN}@gitlab.cern.ch/rodem/projects/projecttemplate/ <repo_name>
 cd <repo_name>
 ```
 to run the example workflows in this repo on an HPC cluster with slurm installed,
@@ -31,7 +31,7 @@ start by setting up a virtual environment:
 python -m venv <env_path>
 source <env_path>/bin/activate
 pip install --upgrade pip
-pip install -r workflow_requirements.txt
+pip install -r requirements_workflow.txt
 ```
 You might have to make sure that your python version, with which you setup the
 environment, is high enough.
