@@ -1,3 +1,5 @@
+cookiecutter==2.5.0
+
 snakemake==7.32.4
 snakemake-executor-plugin-slurm
 invoke
