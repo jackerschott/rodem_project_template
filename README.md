@@ -30,13 +30,7 @@ data generation, model training, model evaluation and result plotting into a
 single command that automatically launches slurm jobs.
 
 ## Using this template
-This repository defines a cookiecutter template for quickly building new base repositories.
-After cloning the repo
-```
-git clone https://gitlab.cern.ch/rodem/projects/projecttemplate/ <repo_name>
-cd <repo_name>
-```
-start by setting up a new virtual environment on an HPC cluster with slurm and
+Start by setting up a new virtual environment on an HPC cluster with slurm and
 install cookiecutter:
 ```
 python3 -m venv <env_path>
@@ -49,9 +43,13 @@ workflow requirements as described in the project readme.
 
 Now we can run
 ```
-cookiecutter git clone https://${USERNAME}:${ACCESS_TOKEN}@gitlab.cern.ch/rodem/projects/projecttemplate
+cookiecutter https://${USERNAME}:${ACCESS_TOKEN}@gitlab.cern.ch/rodem/projects/projecttemplate
 ```
 And follow the prompts to create your new project.
+To use a specific branch:
+```
+cookiecutter -c <branch> https://${USERNAME}:${ACCESS_TOKEN}@gitlab.cern.ch/rodem/projects/projecttemplate
+```
 
 You can also clone the repository and then define a new instance as follows
 ```
