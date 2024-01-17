@@ -1,4 +1,4 @@
 exp_group: "initial_testing"
 stage: "debug"
-container_path: '/home/users/a/ackersch/scratch/projects/template/experiment_env.sif'
-experiments_base_path: '/srv/beegfs/scratch/users/a/ackersch/projects/experiments'
+container_path: {{ cookiecutter.container_path }}
+experiments_base_path: {{ cookiecutter.experiments_base_path }}
