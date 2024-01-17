@@ -78,6 +78,11 @@ where we only added `--workflow=sweep` to the previous command.
 This will launch a hyperparameter search over previously defined parameters
 in `workflow/config/sweep.yaml` and save the results with wandb.
 
+## Configuration
+
+All workflow configuration is handled by hydra and omegaconf and is stored as `workflow/config/<workflow_name>.yaml`,
+when the workflow is defined in `workflow/<workflow_name>.smk`.
+
 ## Docker and Gitlab
 
 This project is setup to use the CERN GitLab CI/CD to automatically build a Docker image based
