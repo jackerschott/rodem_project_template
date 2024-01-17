@@ -19,9 +19,9 @@ and invoke as a project cli.
 
 ## Usage
 
-After cloning the repo
+After cloning the example branch of this repo:
 ```
-git clone https://gitlab.cern.ch/rodem/projects/projecttemplate/ <repo_name>
+git clone -b example https://gitlab.cern.ch/rodem/projects/projecttemplate/ <repo_name>
 cd <repo_name>
 ```
 to run the example workflows in this repo on an HPC cluster with slurm installed,
