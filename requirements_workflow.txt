@@ -1,6 +1,6 @@
 snakemake==7.32.4
-snakemake-executor-plugin-slurm==0.2.0
-invoke==2.2.0
+snakemake-executor-plugin-slurm
+invoke
 git+https://gitlab.cern.ch/mleigh/mltools@dev_jona
 
 # currently needed for snakemake not to break
