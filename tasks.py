@@ -2,6 +2,7 @@ import glob
 import logging
 import os
 from pathlib import Path
+from typing import Optional
 
 from invoke import Context, task
 
@@ -43,13 +44,13 @@ def experiment_run(
         snakemake_cfg.append(f"stage={stage}")
     if group:
         snakemake_cfg.append(f"exp_group={group}")
-    snakemake_cfg = ' '.join(snakemake_cfg)
+    snakemake_cfg = " ".join(snakemake_cfg)
 
     snakemake_cmd = [
         "snakemake",
         f"--snakefile workflow/{workflow}.smk",
         f"--workflow-profile workflow/profiles/{profile}",
-        f"--configfile workflow/experiment_config.yaml",
+        "--configfile workflow/experiment_config.yaml",
         f"--config {snakemake_cfg}",
     ]
     snakemake_cmd = " ".join(snakemake_cmd)
