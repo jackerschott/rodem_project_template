@@ -1,16 +1,15 @@
-container: '/home/users/a/ackersch/scratch/'
-    'projects/template/experiment_env.sif'
+container: config['container_path']
 
 envvars:
     "WANDB_API_KEY"
 
-from pathlib import Path
+import os
 from mltools.snakemake import load_hydra_config
 
 LOADER_THREADS = 4
 
 exp_group, exp_name = config['exp_group'], config['exp_name']
-exp_path = f'experiments/{exp_group}/{exp_name}'
+exp_path = os.path.join(config['experiments_base_path'], exp_group, exp_name)
 experiment_id = f'{exp_group}/{exp_name}'
 
 hydra_cfg = load_hydra_config('sweep')
