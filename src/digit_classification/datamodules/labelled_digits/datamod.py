@@ -1,16 +1,15 @@
 from functools import partial
-import multiprocessing
-import numpy as np
-from numpy.typing import NDArray
+from typing import Dict, Iterable, Literal, Optional, Tuple, Union
+
 import lightning as L
+import numpy as np
 import torch as T
-from torch.utils.data import DataLoader, TensorDataset, Subset, random_split
-from typing import Any, Optional, Literal, Union, Iterable, Tuple, Dict
+from numpy.typing import NDArray
+from torch.utils.data import DataLoader, TensorDataset, random_split
 
-from .preprocs import Preprocessor
 from .datasets import Dataset
+from .preprocs import Preprocessor
 
-import matplotlib.pyplot as plt
 
 class LabelledDigitsModule(L.LightningDataModule):
     train_set: Optional[Dataset]
@@ -25,15 +24,22 @@ class LabelledDigitsModule(L.LightningDataModule):
 
     datasets: Dict[str, TensorDataset]
 
-    def __init__(self, preproc: Preprocessor, train_set: Optional[Dataset],
-            predict_set: Optional[Union[Literal['use_test'], Dataset]],
-            train_loader_factory: partial, predict_loader_factory: partial,
-            test_frac: float, val_frac: float, split_seed: int = 0):
+    def __init__(
+        self,
+        preproc: Preprocessor,
+        train_set: Optional[Dataset],
+        predict_set: Optional[Union[Literal["use_test"], Dataset]],
+        train_loader_factory: partial,
+        predict_loader_factory: partial,
+        test_frac: float,
+        val_frac: float,
+        split_seed: int = 0,
+    ):
         super().__init__()
         self.save_hyperparameters(logger=False)
 
         self.train_set = train_set
-        self.predict_set = predict_set 
+        self.predict_set = predict_set
         self.preproc = preproc
         self.train_loader_factory = train_loader_factory
         self.predict_loader_factory = predict_loader_factory
@@ -41,16 +47,17 @@ class LabelledDigitsModule(L.LightningDataModule):
         self.split_fracs = dict(test=test_frac, val=val_frac)
         self.split_generator = T.Generator().manual_seed(split_seed)
 
-    def _preproc(self, labels: NDArray, digit_imgs: NDArray) \
-            -> Tuple[T.Tensor, T.Tensor]:
+    def _preproc(
+        self, labels: NDArray, digit_imgs: NDArray
+    ) -> Tuple[T.Tensor, T.Tensor]:
         # one-hot encoding can only be undone for 1 or 0 labels
         # not for the network output; hence it doesn't belong in the preprocessor
         labels_encoded = np.eye(10)[labels]
 
-        labels_preproc = self.preproc.preprocess('labels', labels_encoded)
+        labels_preproc = self.preproc.preprocess("labels", labels_encoded)
         labels_preproc = T.tensor(labels_preproc, dtype=T.float)
 
-        digit_imgs_preproc = self.preproc.preprocess('digit_imgs', digit_imgs)
+        digit_imgs_preproc = self.preproc.preprocess("digit_imgs", digit_imgs)
         digit_imgs_preproc = T.tensor(digit_imgs_preproc, dtype=T.float)
 
         return labels_preproc, digit_imgs_preproc
@@ -58,20 +65,19 @@ class LabelledDigitsModule(L.LightningDataModule):
     def setup(self, stage: str):
         self.datasets = {}
 
-        if stage == 'fit':
+        if stage == "fit":
             labels_preproc, digit_imgs_preproc = self._preproc(*self.train_set.get())
             dataset = TensorDataset(labels_preproc, digit_imgs_preproc)
-            
+
             split_fracs = list(self.split_fracs.values())
             split_fracs = [*split_fracs, 1 - sum(split_fracs)]
             splits = random_split(dataset, split_fracs, self.split_generator)
 
-            i_val = list(self.split_fracs.keys()).index('val')
-            self.datasets['val'] = splits[i_val]
+            i_val = list(self.split_fracs.keys()).index("val")
+            self.datasets["val"] = splits[i_val]
             # from here train is only train, i.e. without val and test
-            self.datasets['train'] = splits[-1]
-        elif stage == 'test' or stage == 'predict' \
-                and self.predict_set == 'use_test':
+            self.datasets["train"] = splits[-1]
+        elif stage == "test" or stage == "predict" and self.predict_set == "use_test":
             labels_preproc, digit_imgs_preproc = self._preproc(*self.train_set.get())
             dataset = TensorDataset(labels_preproc, digit_imgs_preproc)
 
@@ -79,42 +85,42 @@ class LabelledDigitsModule(L.LightningDataModule):
             split_fracs = [*split_fracs, 1 - sum(split_fracs)]
             splits = random_split(dataset, split_fracs, self.split_generator)
 
-            i_test = list(self.split_fracs.keys()).index('test')
-            if stage == 'test':
-                self.datasets['test'] = splits[i_test]
-            elif stage == 'predict':
-                self.datasets['predict'] = splits[i_test]
-        elif stage == 'predict':
+            i_test = list(self.split_fracs.keys()).index("test")
+            if stage == "test":
+                self.datasets["test"] = splits[i_test]
+            elif stage == "predict":
+                self.datasets["predict"] = splits[i_test]
+        elif stage == "predict":
             labels_preproc, digit_imgs_preproc = self._preproc(*self.predict_set.get())
-            self.datasets['predict'] = TensorDataset(labels_preproc, digit_imgs_preproc)
+            self.datasets["predict"] = TensorDataset(labels_preproc, digit_imgs_preproc)
 
     def train_dataloader(self) -> DataLoader:
-        return self.train_loader_factory(self.datasets['train'], shuffle=True)
+        return self.train_loader_factory(self.datasets["train"], shuffle=True)
 
     def val_dataloader(self) -> DataLoader:
-        return self.train_loader_factory(self.datasets['val'], shuffle=False)
+        return self.train_loader_factory(self.datasets["val"], shuffle=False)
 
     def test_dataloader(self) -> DataLoader:
-        return self.train_loader_factory(self.datasets['test'], shuffle=False)
+        return self.train_loader_factory(self.datasets["test"], shuffle=False)
 
     def predict_dataloader(self) -> DataLoader:
-        return self.predict_loader_factory(self.datasets['predict'], shuffle=False)
+        return self.predict_loader_factory(self.datasets["predict"], shuffle=False)
 
     def get_data_sample(self) -> DataLoader:
-        if not self.train_set is None:
+        if self.train_set is not None:
             label, digit_img = self.train_set.get_init_sample()
         else:
             label, digit_img = self.predict_set.get_init_sample()
 
         label_preproc, digit_img_preproc = self._preproc(label, digit_img)
         return label_preproc, digit_img_preproc
-            
+
     def invert_setup_on_prediction(self, batches: Iterable[T.Tensor]):
         labels_pred = T.cat([x for x, _ in batches]).numpy()
         labels_truth = T.cat([x for _, x in batches]).numpy()
 
-        labels_pred = self.preproc.unpreprocess('labels', labels_pred)
-        labels_truth = self.preproc.unpreprocess('labels', labels_truth)
+        labels_pred = self.preproc.unpreprocess("labels", labels_pred)
+        labels_truth = self.preproc.unpreprocess("labels", labels_truth)
         return labels_pred, labels_truth
 
     def save(self, path) -> None:
@@ -125,25 +131,32 @@ class LabelledDigitsModule(L.LightningDataModule):
         state = np.load(path)
         self._set_state_dict(state)
 
-if __name__ == '__main__':
-    import unittest
-    import matplotlib.pyplot as plt
-    from matplotlib.backends.backend_pdf import PdfPages
 
-    from .preprocs import SimplePreprocessor
+if __name__ == "__main__":
+    import unittest
+
     from .datasets import MNISTDataset
+    from .preprocs import SimplePreprocessor
 
     class TestLabelledDigitsModule(unittest.TestCase):
         def test_setup(self):
             preproc = SimplePreprocessor()
             train_set = MNISTDataset(10_000)
-            train_set.acquire(tmp_save_dir='mnist')
+            train_set.acquire(tmp_save_dir="mnist")
 
-            train_loader_factory = partial(T.utils.data.DataLoader,
-                    batch_size=1024, num_workers=1, pin_memory=True)
-            datamod = LabelledDigitsModule(preproc, train_set, None,
-                    train_loader_factory, None, test_frac=0.1, val_frac=0.1)
-            datamod.setup('fit')
+            train_loader_factory = partial(
+                T.utils.data.DataLoader, batch_size=1024, num_workers=1, pin_memory=True
+            )
+            datamod = LabelledDigitsModule(
+                preproc,
+                train_set,
+                None,
+                train_loader_factory,
+                None,
+                test_frac=0.1,
+                val_frac=0.1,
+            )
+            datamod.setup("fit")
 
             dataloader = datamod.train_dataloader()
 
@@ -160,12 +173,20 @@ if __name__ == '__main__':
         def test_get_data_sample(self):
             preproc = SimplePreprocessor()
             train_set = MNISTDataset(10_000)
-            train_set.acquire(tmp_save_dir='mnist')
+            train_set.acquire(tmp_save_dir="mnist")
 
-            train_loader_factory = partial(T.utils.data.DataLoader,
-                    batch_size=1024, num_workers=1, pin_memory=True)
-            datamod = LabelledDigitsModule(preproc, train_set, None,
-                    train_loader_factory, None, test_frac=0.1, val_frac=0.1)
+            train_loader_factory = partial(
+                T.utils.data.DataLoader, batch_size=1024, num_workers=1, pin_memory=True
+            )
+            datamod = LabelledDigitsModule(
+                preproc,
+                train_set,
+                None,
+                train_loader_factory,
+                None,
+                test_frac=0.1,
+                val_frac=0.1,
+            )
 
             label, digit_img = datamod.get_data_sample()
             self.assertTrue(label.shape == (1, 10))

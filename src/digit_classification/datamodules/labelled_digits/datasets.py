@@ -1,17 +1,19 @@
+import tempfile
 from abc import ABC, abstractmethod
+from typing import Optional, Tuple
+
 import numpy as np
 from numpy.typing import NDArray
-import tempfile
-from typing import Any, Tuple, Dict, Optional
-
 from torchvision import datasets
+
 
 class Dataset(ABC):
     labels: NDArray
     digit_imgs: NDArray
 
-    def __init__(self, size: Optional[int] = None,
-            load_path: Optional[str] = None) -> None:
+    def __init__(
+        self, size: Optional[int] = None, load_path: Optional[str] = None
+    ) -> None:
         if size is None and load_path is not None:
             self.load(load_path)
             self.size = len(self.labels)
@@ -40,9 +42,11 @@ class Dataset(ABC):
     def load(self, filename: str) -> None:
         ...
 
+
 class MNISTDataset(Dataset):
-    def __init__(self, size: Optional[int] = None,
-            load_path: Optional[str] = None) -> None:
+    def __init__(
+        self, size: Optional[int] = None, load_path: Optional[str] = None
+    ) -> None:
         super().__init__(size, load_path)
 
     def acquire(self, tmp_save_dir=None) -> None:

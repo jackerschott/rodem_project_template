@@ -6,7 +6,6 @@ root = pyrootutils.setup_root(search_from=".", pythonpath=True)
 
 import torch as T
 import torch.nn as nn
-
 from mltools.mltools.flows import rqs_flow
 
 flow = rqs_flow(

@@ -1,31 +1,33 @@
 import logging
-import matplotlib.pyplot as plt
-from matplotlib.backends.backend_pdf import PdfPages
-import numpy as np
-from typing import List, Dict
+from typing import List
 
 import hydra
+import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib.backends.backend_pdf import PdfPages
+from mltools.snakemake import snakemake_main
 from omegaconf import DictConfig
 
-from mltools.snakemake import snakemake_main
-
 # setup logger
-logging.basicConfig(level=logging.INFO,
-        format="[%(filename)s] %(levelname)s: %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="[%(filename)s] %(levelname)s: %(message)s"
+)
 log = logging.getLogger(__name__)
 
-@snakemake_main(globals().get('snakemake'))
-def main(cfg: DictConfig, *predictions: List[str],
-        roc_curves: str, pred_ids: List[str]) -> None:
-    log.info('loading data and predictions')
+
+@snakemake_main(globals().get("snakemake"))
+def main(
+    cfg: DictConfig, *predictions: List[str], roc_curves: str, pred_ids: List[str]
+) -> None:
+    log.info("loading data and predictions")
 
     labels_pred, labels_truth = [], []
     for pred_path in predictions:
-        (pred, truth), = np.load(pred_path).values()
+        ((pred, truth),) = np.load(pred_path).values()
         labels_pred.append(pred)
         labels_truth.append(truth)
 
-    log.info('drawing plots')
+    log.info("drawing plots")
     template = hydra.utils.instantiate(cfg.plot_template)
     with PdfPages(roc_curves) as f:
         target = hydra.utils.instantiate(cfg.plot_target, fig_store=f)
@@ -39,5 +41,6 @@ def main(cfg: DictConfig, *predictions: List[str],
 
         plt.close(fig)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

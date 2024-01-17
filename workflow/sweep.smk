@@ -26,7 +26,7 @@ config = hydra_cfg
 rule stop_sweep:
     input:
         # we need to generate a DAG that has job_count parallel train_sweep
-        # invocations; to the best of my knowledge this doesn't work without having 
+        # invocations; to the best of my knowledge this doesn't work without having
         # an file with a wildcard in train_sweep and collecting all output files
         # here; technically one could do this with the wandb run directories, but
         # they have unpredictable names and I don't want to consider internal wandb
