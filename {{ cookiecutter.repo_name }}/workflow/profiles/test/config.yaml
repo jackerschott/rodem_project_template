@@ -7,5 +7,6 @@ singularity-args: >-
   --cleanenv
   --writable-tmpfs
   --env PYTHONPATH=src
+  --bind /srv/beegfs/scratch:/srv/beegfs/scratch
 
 cores: 5

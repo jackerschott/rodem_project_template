@@ -1,0 +1,4 @@
+exp_group: "initial_testing"
+stage: "debug"
+container_path: {{ cookiecutter.container_path }}
+experiments_base_path: {{ cookiecutter.experiments_base_path }}

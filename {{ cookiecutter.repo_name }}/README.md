@@ -85,6 +85,14 @@ on the `docker/Dockerfile` and `requirements.txt`.
 It will also run the pre-commit as part of the pipeline.
 To edit this behaviour change `.gitlab-ci`
 
+## Note on Reproducibility
+Unfortunately snakemake will always mount the site-packages of the virtual
+environment it is called from into any used container, even when used with
+[Conda package management](https://snakemake.readthedocs.io/en/stable/snakefiles/deployment.html#ad-hoc-combination-of-conda-package-management-with-containers).
+This might hamper reproducibility, if we do not document the python
+environment outside of the container.
+See https://github.com/snakemake/snakemake/issues/2632
+
 ## Contributing
 
 Contributions are welcome! Please submit a pull request or create an issue if you have any improvements or suggestions.

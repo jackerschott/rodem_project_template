@@ -7,6 +7,7 @@ singularity-args: >-
   --nv
   --cleanenv
   --env PYTHONPATH=src
+  --bind /srv/beegfs/scratch:/srv/beegfs/scratch
 
 slurm: true
 default-resources:

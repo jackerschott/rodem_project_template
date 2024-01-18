@@ -2,7 +2,9 @@ import glob
 import logging
 import os
 from pathlib import Path
+from typing import Optional
 
+import yaml
 from invoke import Context, task
 
 # setup logger
@@ -16,10 +18,10 @@ log = logging.getLogger(__name__)
 def experiment_run(
     ctx: Context,
     name: str,
-    group: str,
+    group: Optional[str] = None,
     workflow: str = "main",
     profile: str = "test",
-    stage: str = "debug",
+    stage: Optional[str] = None,
     snakemake_args: str = "",
 ):
     workflows = [Path(p).stem for p in glob.glob("workflow/*.smk")]
@@ -38,11 +40,33 @@ def experiment_run(
         )
         return
 
+    snakemake_cfg = [f"exp_name={name}"]
+    if stage:
+        snakemake_cfg.append(f"stage={stage}")
+    if group:
+        snakemake_cfg.append(f"exp_group={group}")
+    snakemake_cfg = " ".join(snakemake_cfg)
+
     snakemake_cmd = [
         "snakemake",
         f"--snakefile workflow/{workflow}.smk",
         f"--workflow-profile workflow/profiles/{profile}",
-        f"--config exp_name={name} exp_group={group} stage={stage}",
+        "--configfile workflow/experiment_config.yaml",
+        f"--config {snakemake_cfg}",
     ]
     snakemake_cmd = " ".join(snakemake_cmd)
+
     ctx.run(f"{snakemake_cmd} {snakemake_args}", pty=True)
+
+
+@task
+def container_pull(ctx: Context, login: bool = False):
+    with open("workflow/experiment_config.yaml") as f:
+        container_path = yaml.safe_load(f)["container_path"]
+
+    login_args = "--docker-login" if login else ""
+    ctx.run(
+        f"apptainer pull {login_args} {container_path}"
+        " docker://gitlab-registry.cern.ch/{{ cookiecutter.gitlab_username }}/{{ cookiecutter.repo_name }}/docker-image:latest",
+        pty=True
+    )

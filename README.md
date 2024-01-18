@@ -13,15 +13,15 @@ The README in the project itself provides more detailed usage instructions.
     * Get data loader.
     * Develop models.
     * Test models.
-2) Start writing paper: 
-    * Settle on models and evaluation. 
+2) Start writing paper:
+    * Settle on models and evaluation.
     * Run pipeline.
-3) New requests: 
+3) New requests:
     * Update models.
-    * Extend evaluation. 
+    * Extend evaluation.
     * Rerun models.
     * Rerun evaluation.
-    * Update paper.    
+    * Update paper.
 4) Iterate 3 until done.
 
 In the above workflow by far the most exhausting, time consuming, and boring, is step 4.
@@ -43,35 +43,50 @@ workflow requirements as described in the project readme.
 
 Now we can run
 ```
-cookiecutter https://${USERNAME}:${ACCESS_TOKEN}@gitlab.cern.ch/rodem/projects/projecttemplate
+cookiecutter ssh://git@gitlab.cern.ch:7999/rodem/projects/projecttemplate.git
 ```
 And follow the prompts to create your new project.
 To use a specific branch:
 ```
-cookiecutter -c <branch> https://${USERNAME}:${ACCESS_TOKEN}@gitlab.cern.ch/rodem/projects/projecttemplate
+cookiecutter -c <branch> ssh://git@gitlab.cern.ch:7999/rodem/projects/projecttemplate.git
 ```
 You can also clone the repository and then define a new instance as follows
 ```
-git clone https://gitlab.cern.ch/rodem/projects/projecttemplate
+git clone ssh://git@gitlab.cern.ch:7999/rodem/projects/projecttemplate.git
 cookiecutter projecttemplate
 ```
-Note that cookiecutter will ask you for a container path.
-The corresponding container is supposed to be build by the provided Dockerfile
+Note that cookiecutter will ask you for a container path and a base path for
+experiment output.
+For the container path, the corresponding container is supposed to be build by the provided Dockerfile
 and gitlab CI and pulled to the provided path later.
 Naturally the container path can always be changed by editing `workflow/main.smk` and `workflow/sweep.smk`.
+Regarding the experiment base path, be careful that you avoid symlinks within
+that path, in particular the `scratch` symlink in your home directory, as this
+will cause problems with snakemake trying to find this path inside and outside
+of the container.
 
 Afterwards you will be left with a new repository using the values you entered.
 This repository will not by default be a git repository, so you want to
-initialize one, setup a gitlab repository and push.
+initialize one and push it to gitlab
+```
+git init
+git add .
+git rm --cached workflow/experiment_config.yaml
+git commit -m 'add rodem ml project template'
+git remote add origin ssh://git@gitlab.cern.ch:7999/<gitlab_username>/$(git rev-parse --show-toplevel | xargs basename).git
+git push --set-upstream origin master
+```
 This will also automatically launch a gitlab pipeline to build a container,
 using the provided Dockerfile.
+Note that we do not commit and push `workflow/experiment_config.yaml`, since this will be
+user specific.
 
 After the pipeline is done you want to pull the container
 ```
-apptainer pull --docker-login <container_path> <gitlab_repo_url>/docker-image:latest
+inv container-pull --login
 ```
-where `<gitlab_repo_url>` should be replaced with the url to your newly created
-gitlab repo and `<container_path>` with the path you entered previously.
+This automatically pulls the container to the `container_path` entered
+previously.
 
 This concludes the setup.
 For instructions on how to run experiments, you can check out the README inside the project.
@@ -80,7 +95,7 @@ For instructions on how to run experiments, you can check out the README inside 
 
 Contributions are welcome! Please submit a pull request or create an issue if you have any improvements or suggestions.
 Note that the `master` branch is nothing but a few commits on top of the `example` branch that
-"cookiecutterizes" everything. 
+"cookiecutterizes" everything.
 So for almost all development you want to use the example branch and rebase the
 master branch onto it.
 Also, please use the provided `pre-commit` before making merge requests!

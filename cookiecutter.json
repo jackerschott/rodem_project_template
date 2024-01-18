@@ -1,9 +1,11 @@
 {
     "project_name": null,
+    "gitlab_username": null,
     "repo_name": "{{ cookiecutter.project_name.strip().replace(' ', '-').replace('_', '-').lower() }}",
     "python_package": "{{ cookiecutter.project_name.strip().replace(' ', '_').replace('-', '_').lower() }}",
-    "your_name": null,
+    "container_path": null,
+    "experiments_base_path": null,
     "wandb_username": null,
     "wandb_projectname": "{{ cookiecutter.project_name }}",
-    "container_path": null
+    "your_name": null
 }

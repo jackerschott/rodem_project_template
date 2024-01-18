@@ -5,19 +5,19 @@
 # note that snakemake mounts all directories from sys.path into
 # the container, so effectively this only replaces the OS, not
 # the python environment
-container: '{{ cookiecutter.container_path }}'
+container: config['container_path']
 
 envvars:
     "WANDB_API_KEY"
 
-from pathlib import Path
+import os
 from mltools.snakemake import load_hydra_config
 
 LOADER_THREADS = 4
 HIDDEN_CONV_CHANNELS = [4, 8]
 
 exp_group, exp_name = config['exp_group'], config['exp_name']
-exp_path = f'experiments/{exp_group}/{exp_name}'
+exp_path = os.path.join(config['experiments_base_path'], exp_group, exp_name)
 experiment_id = f'{exp_group}/{exp_name}'
 
 hydra_cfg = load_hydra_config('main')
