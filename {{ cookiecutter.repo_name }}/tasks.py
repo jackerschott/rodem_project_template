@@ -4,6 +4,7 @@ import os
 from pathlib import Path
 from typing import Optional
 
+import yaml
 from invoke import Context, task
 
 # setup logger
@@ -56,3 +57,16 @@ def experiment_run(
     snakemake_cmd = " ".join(snakemake_cmd)
 
     ctx.run(f"{snakemake_cmd} {snakemake_args}", pty=True)
+
+
+@task
+def container_pull(ctx: Context, login: bool = False):
+    with open("workflow/experiment_config.yaml") as f:
+        container_path = yaml.safe_load(f)["container_path"]
+
+    login_args = "--docker-login" if login else ""
+    ctx.run(
+        f"apptainer pull {login_args} {container_path}"
+        " docker://gitlab-registry.cern.ch/{{ cookiecutter.gitlab_username }}/{{ cookiecutter.repo_name }}/docker-image:latest",
+        pty=True
+    )
