@@ -1,0 +1,26 @@
+_target_: "digit_classification.datamodules\
+  .labelled_digits.datamod.LabelledDigitsModule"
+
+defaults:
+  - _self_
+
+preproc:
+  _target_: "digit_classification.datamodules\
+    .labelled_digits.preprocs.SimplePreprocessor"
+
+train_loader_factory:
+  _target_: torch.utils.data.DataLoader
+  _partial_: True
+  batch_size: 1024
+  num_workers: null # set by snakemake
+  pin_memory: true
+
+predict_loader_factory:
+  _target_: torch.utils.data.DataLoader
+  _partial_: True
+  batch_size: 1024
+  num_workers: null # set by snakemake
+  pin_memory: true
+
+test_frac: 0.1
+val_frac: 0.1

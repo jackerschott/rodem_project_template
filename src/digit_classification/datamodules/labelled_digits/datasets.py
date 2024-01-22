@@ -14,10 +14,10 @@ class Dataset(ABC):
     def __init__(
         self, size: Optional[int] = None, load_path: Optional[str] = None
     ) -> None:
-        if size is None and load_path is not None:
+        if load_path is not None:
             self.load(load_path)
             self.size = len(self.labels)
-        elif size is not None and load_path is None:
+        elif size is not None:
             self.size = size
         else:
             assert False

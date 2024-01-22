@@ -1,0 +1,16 @@
+_target_: digit_classification.plotting.Monitor
+monitor_width_mm: 600
+# empirically determined latex font sizes (in points)
+# likely dependend on the specific setup used then
+fontsizes:
+  _target_: builtins.dict
+  Huge: 24.88
+  huge: 24.88
+  LARGE: 20.74
+  Large: 17.28
+  large: 14.40
+  normal: 12.00
+  small: 10.95
+  footnotesize: 10.00
+  scriptsize: 8.00
+  tiny: 6.00

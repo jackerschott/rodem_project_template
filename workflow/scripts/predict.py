@@ -16,7 +16,7 @@ log = logging.getLogger(__name__)
 
 
 @snakemake_main(globals().get("snakemake"))
-def main(cfg: DictConfig, dataset: str, model: str, prediction: str) -> None:
+def main(cfg: DictConfig, model: str, prediction: str) -> None:
     if cfg.seed:
         log.info(f"Setting seed to: {cfg.seed}")
         L.seed_everything(cfg.seed, workers=True)
@@ -25,7 +25,7 @@ def main(cfg: DictConfig, dataset: str, model: str, prediction: str) -> None:
     T.set_float32_matmul_precision(cfg.precision)
 
     log.info("Instantiating the datamodule")
-    dataset = hydra.utils.instantiate(cfg.dataset, size=None, load_path=dataset)
+    dataset = hydra.utils.instantiate(cfg.dataset)
     datamodule = hydra.utils.instantiate(
         cfg.datamodule, train_set=dataset, predict_set="use_test"
     )

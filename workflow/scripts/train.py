@@ -7,7 +7,6 @@ import hydra
 import lightning as L
 import torch as T
 import wandb
-from mltools.snakemake import snakemake_main
 from omegaconf import DictConfig
 
 # setup logger
@@ -40,10 +39,6 @@ def find_max_epoch_checkpoint(checkpoints_pattern: str, checkpoints_path: str):
 def train(
     log,
     cfg: DictConfig,
-    dataset_path: str,
-    model_path: str,
-    checkpoints_path: str,
-    auto_resume=True,
 ) -> (L.Trainer, L.LightningModule, L.LightningDataModule):
     if cfg.seed:
         log.info(f"Setting seed to: {cfg.seed}")
@@ -53,30 +48,31 @@ def train(
     T.set_float32_matmul_precision(cfg.precision)
 
     log.info("Instantiating the datamodule")
-    dataset = hydra.utils.instantiate(cfg.dataset, size=None, load_path=dataset_path)
+    dataset = hydra.utils.instantiate(cfg.dataset)
     datamodule = hydra.utils.instantiate(
         cfg.datamodule, train_set=dataset, predict_set=None
     )
 
     log.info("Instantiating the model")
-    model = hydra.utils.instantiate(cfg.model, data_sample=datamodule.get_data_sample())
+    model = hydra.utils.instantiate(cfg.model,
+            data_sample=datamodule.get_data_sample())
 
     if cfg.compile:
         log.info(f"Compiling the model using torch 2.0: {cfg.compile}")
         model = T.compile(model, mode=cfg.compile)
 
     log.info("Instantiating the trainer")
-    for i, callbacks in enumerate(cfg.trainer.callbacks):
-        if callbacks._target_.endswith("ModelCheckpoint"):
-            cfg.trainer.callbacks[i].dirpath = checkpoints_path
-            checkpoints_pattern = cfg.trainer.callbacks[i].filename
-
+    # we want to have (easy) access to callbacks and logger,
+    # so we need to convert to a list for the trainer constructor
+    checkpoints_pattern = cfg.trainer.callbacks.model_checkpoint.filename
+    cfg.trainer.callbacks = list(cfg.trainer.callbacks.values())
+    cfg.trainer.logger = list(cfg.trainer.logger.values())
     trainer: L.Trainer = hydra.utils.instantiate(cfg.trainer)
 
     log.info("Starting training!")
     ckpt_path = (
         find_max_epoch_checkpoint(checkpoints_pattern, checkpoints_path)
-        if auto_resume
+        if cfg.auto_resume
         else None
     )
     trainer.fit(model, datamodule, ckpt_path=ckpt_path)
@@ -87,52 +83,38 @@ def train(
         if isinstance(cb, L.pytorch.callbacks.ModelCheckpoint)
     ][0]
 
-    if model_path:
+    if cfg.model_save_path:
         best_model_path_rel = os.path.relpath(
-            checkpoint_callback.best_model_path, Path(model_path).parent
+            checkpoint_callback.best_model_path,
+            Path(cfg.model_save_path).parent
         )
-        os.symlink(best_model_path_rel, model_path)
+        os.symlink(best_model_path_rel, cfg.model_save_path)
 
     return trainer, model, datamodule
 
 
-@snakemake_main(globals().get("snakemake"))
-def main(
-    cfg: DictConfig,
-    dataset: str,
-    model: str,
-    hidden_conv_channels: int,
-    checkpoints_path: str,
-    wandb_run_id_path: str,
-    wandb_run_name: str,
-    wandb_save_dir: str,
-    trainer_default_root_dir: str,
-) -> None:
-    cfg.wandb.name = wandb_run_name
-    cfg.wandb.save_dir = wandb_save_dir
-    cfg.trainer.default_root_dir = trainer_default_root_dir
-    cfg.model.hidden_conv_channels = hidden_conv_channels
-
+@hydra.main(config_path='../config', config_name='train_model', version_base=None)
+def main(cfg: DictConfig) -> None:
     wandb.login(key=cfg.wandb.api_key)
+
     wandb_run_id = (
-        Path(wandb_run_id_path).read_text()
-        if os.path.exists(wandb_run_id_path)
+        Path(cfg.wandb.run_id_path).read_text()
+        if os.path.exists(cfg.wandb.run_id_path)
         else None
     )
-    resume = "must" if wandb_run_id else None
     wandb.init(
         job_type="train",
         dir=cfg.wandb.save_dir,
         project=cfg.wandb.project,
         entity=cfg.wandb.user,
         tags=cfg.wandb.tags,
-        name=cfg.wandb.name,
-        resume=resume,
+        name=cfg.wandb.run_name,
+        resume=("must" if wandb_run_id else None),
         id=wandb_run_id,
     )
-    Path(wandb_run_id_path).write_text(wandb.run.id)
+    Path(cfg.wandb.run_id_path).write_text(wandb.run.id)
 
-    train(log, cfg, dataset, model, checkpoints_path)
+    train(log, cfg)
 
 
 if __name__ == "__main__":
