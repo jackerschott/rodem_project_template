@@ -6,7 +6,7 @@ use-singularity: true
 singularity-args: >-
   --nv
   --cleanenv
-  --env PYTHONPATH=src
+  --env PYTHONPATH=.
   --bind /srv/beegfs/scratch:/srv/beegfs/scratch
 
 slurm: true

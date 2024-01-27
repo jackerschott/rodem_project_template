@@ -47,6 +47,7 @@ def experiment_run(
     snakemake_cfg = " ".join(snakemake_cfg)
 
     snakemake_cmd = [
+        "PYTHONPATH=.",
         "snakemake",
         f"--snakefile workflow/{workflow}.smk",
         f"--workflow-profile workflow/profiles/{profile}",
