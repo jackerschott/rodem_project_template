@@ -93,7 +93,8 @@ def train(
     return trainer, model, datamodule
 
 
-@hydra.main(config_path='../config', config_name='train_model', version_base=None)
+@hydra.main(config_path="../config",
+        config_name="acquire_data", version_base=None)
 def main(cfg: DictConfig) -> None:
     wandb.login(key=cfg.wandb.api_key)
 
