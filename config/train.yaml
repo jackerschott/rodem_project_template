@@ -1,0 +1,15 @@
+defaults:
+  - _self_
+
+  - model: cnn
+  - dataset: mnist
+  - datamodule: labelled_digits
+
+  - trainer: default
+  - trainenv: 
+
+  - wandb: default
+  - hydra: default
+
+model_save_path: model.ckpt
+auto_resume: true

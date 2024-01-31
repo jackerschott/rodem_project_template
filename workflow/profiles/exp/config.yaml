@@ -6,7 +6,7 @@ use-singularity: true
 singularity-args: >-
   --nv
   --cleanenv
-  --env PYTHONPATH=.
+  --env PYTHONPATH=contrib/mltools:.
   --bind /srv/beegfs/scratch:/srv/beegfs/scratch
 
 slurm: true

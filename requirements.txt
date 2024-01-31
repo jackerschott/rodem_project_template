@@ -3,7 +3,7 @@ torch
 lightning
 wandb
 normflows
-git+https://gitlab.cern.ch/mleigh/mltools@dev_jona
+git+https://gitlab.cern.ch/mleigh/mltools@projecttemplate
 
 # snakemake script debugging
 typer

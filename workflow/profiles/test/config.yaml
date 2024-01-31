@@ -6,7 +6,7 @@ singularity-args: >-
   --nv
   --cleanenv
   --writable-tmpfs
-  --env PYTHONPATH=.
+  --env PYTHONPATH=contrib/mltools:.
   --bind /srv/beegfs/scratch:/srv/beegfs/scratch
 
 cores: 5

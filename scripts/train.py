@@ -94,7 +94,7 @@ def train(
 
 
 @hydra.main(config_path="../config",
-        config_name="acquire_data", version_base=None)
+        config_name="train", version_base=None)
 def main(cfg: DictConfig) -> None:
     wandb.login(key=cfg.wandb.api_key)
 

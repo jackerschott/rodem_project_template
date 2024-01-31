@@ -10,10 +10,6 @@ container: config['container_path']
 envvars:
     "WANDB_API_KEY"
 
-import os
-from mltools.snakemake import load_hydra_config
-
-LOADER_THREADS = 4
 HIDDEN_CONV_CHANNELS = [4, 8]
 
 exp_group, exp_name = config['exp_group'], config['exp_name']
@@ -54,29 +50,48 @@ rule all:
         model = expand(exp_path + '/train_output/model_{hidden_conv_channels}.ckpt',
                 hidden_conv_channels=range(2))
 
-### PREDICTING ###
-#rule predict:
-#    input:
-#        model = exp_path + '/train_output/model_{i}.ckpt',
-#        dataset = f'{exp_path}/data.npz',
-#    output:
-#        prediction = exp_path + '/predictions/prediction_{i}.npz'
-#    log: exp_path + '/logs/predict_{i}.log'
-#    threads: LOADER_THREADS
-#    resources:
-#        runtime = 15,
-#        mem_mb = 16000,
-#        slurm_extra = '--gpus=1'
-#    script:
-#        'scripts/predict.py'
+### PLOT ###
+rule plot:
+    input:
+        dataset = f'{exp_path}/data.npz',
+        prediction_1 = f'{exp_path}/predictions/prediction_1.h5',
+        prediction_2 = f'{exp_path}/predictions/prediction_2.h5'
+    output:
+        plot = f'{exp_path}/plots/roc_curves.pdf'
+    params:
 
-rule train_model:
+    log: exp_path + '/logs/plot.log'
+    wrapper:
+        'https://raw.githubusercontent.com/sambklein/hydra_snakmake/main/'
+
+### PREDICTING ###
+rule predict:
+    input:
+        model = exp_path + '/train_output/model_{i}.ckpt',
+        dataset = f'{exp_path}/data.npz',
+    output:
+        prediction = exp_path + '/predictions/prediction_{i}.h5'
+    params:
+    'scripts/predict.py',
+    f'hydra.run.dir={exp_path}/hydra/predict',
+    'dataset.load_path'
+    threads: 4
+    resources:
+        runtime = 15,
+        mem_mb = 16000,
+        gpu=1,
+    log: exp_path + '/logs/predict_{i}.log'
+    wrapper:
+        'https://raw.githubusercontent.com/sambklein/hydra_snakmake/main/'
+
+rule train:
     input:
         dataset = f'{exp_path}/data.npz',
     output:
         model = exp_path + '/train_output/model_{i}.ckpt',
     params:
-        'workflow/scripts/train.py',
+        'scripts/train.py',
+        f'hydra.run.dir={exp_path}/hydra/predict'
         'dataset.load_path={input.dataset}',
         'model_save_path={output.model}',
         lambda wc: 'model.hidden_conv_channels'
@@ -91,23 +106,25 @@ rule train_model:
         f'wandb.save_dir={exp_path}/train_output',
         'datamodule.train_loader_factory.num_workers={threads-1}',
         'datamodule.predict_loader_factory.num_workers={threads-1}',
-        'auto_resume=false',
+        'auto_resume=true',
     threads: 4
     resources:
         runtime = 60,
         mem_mb = 16000, # this also requests memory from slurm
-        slurm_extra = '--gpus=1'
+        gpu = 1,
     log: f'{exp_path}/logs/train_model_{{i}}.log'
     wrapper:
-        'file:workflow/wrappers/hydra_script'
+        'https://raw.githubusercontent.com/sambklein/hydra_snakmake/main/'
 
 ### DATA ACQUISITION ###
 rule acquire_data:
     output:
         dataset = f'{exp_path}/data.npz',
     params:
-        'workflow/scripts/acquire_data.py',
+        'scripts/acquire_data.py',
+        f'hydra.run.dir={exp_path}/hydra/predict'
         'save_path={output.dataset}'
     log: f'{exp_path}/logs/acquire_data.log'
+    cache: True
     wrapper:
-        'file:workflow/wrappers/hydra_script'
+        'https://raw.githubusercontent.com/sambklein/hydra_snakmake/main/'

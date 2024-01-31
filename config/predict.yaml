@@ -1,0 +1,11 @@
+defaults:
+  - _self_
+  - model: cnn
+  - dataset: mnist
+
+  - trainenv: default
+
+  - hydra: default
+
+model_checkpoint_path: model.ckpt
+prediction_save_path: prediction.npz

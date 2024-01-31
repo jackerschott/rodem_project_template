@@ -21,6 +21,7 @@ def experiment_run(
     workflow: str = "main",
     profile: str = "test",
     stage: Optional[str] = None,
+    cache: bool = True,
     snakemake_args: str = "",
 ):
     workflows = [Path(p).stem for p in glob.glob("workflow/*.smk")]
@@ -47,13 +48,15 @@ def experiment_run(
     snakemake_cfg = " ".join(snakemake_cfg)
 
     snakemake_cmd = [
-        "PYTHONPATH=.",
+        "PYTHONPATH=contrib/mltools:.",
         "snakemake",
         f"--snakefile workflow/{workflow}.smk",
         f"--workflow-profile workflow/profiles/{profile}",
         "--configfile workflow/experiment_config.yaml",
         f"--config {snakemake_cfg}",
     ]
+    if cache:
+        snakemake_cmd.append("--cache")
     snakemake_cmd = " ".join(snakemake_cmd)
 
     ctx.run(f"{snakemake_cmd} {snakemake_args}", pty=True)

@@ -1,0 +1,3 @@
+[submodule "contrib/mltools"]
+	path = contrib/mltools
+	url = https://gitlab.cern.ch/mleigh/mltools

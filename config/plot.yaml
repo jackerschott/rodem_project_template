@@ -1,0 +1,10 @@
+defaults:
+  - _self_
+  - dataset: mnist
+
+  - plot_target: monitor
+  - plot_template: truth_reco_diff
+  #- summaries: default
+
+pred_paths: null
+output_file: null
