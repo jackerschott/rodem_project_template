@@ -2,14 +2,20 @@ defaults:
   - _self_
 
   - model: cnn
-  - dataset: mnist
   - datamodule: labelled_digits
 
   - trainer: default
-  - trainenv: 
 
-  - wandb: default
   - hydra: default
+  - common: default
+  - override common: private # create your own and never push! look at default for reference
 
-model_save_path: model.ckpt
-auto_resume: true
+id: debug # unique identifier for this particular training, useful for logging
+seed: 0
+
+io:
+  dataset_path: data.npz
+  checkpoints_path: train_output/checkpoints
+  result_path: train_output/result.ckpt
+  trainer_root: train_output
+  logging_dir: train_output

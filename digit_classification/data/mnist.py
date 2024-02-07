@@ -1,16 +1,15 @@
-from abc import ABC, abstractmethod
-from functools import partial
-from typing import Any, Optional, Dict, Iterable, Literal, Optional, Tuple, Union
+from typing import Any, Iterable, Optional, Tuple
 
 import hydra
 import lightning as L
 import numpy as np
 import torch as T
-from numpy.typing import NDArray
-from torch.utils.data import DataLoader, Dataset, TensorDataset
 from mltools.torch_utils import train_valid_split
+from numpy.typing import NDArray
 from omegaconf import DictConfig
+from torch.utils.data import DataLoader, Dataset, TensorDataset
 from torchvision.datasets import MNIST
+
 
 class MNISTDataset:
     labels: np.ndarray
@@ -20,7 +19,7 @@ class MNISTDataset:
         self,
         *,
         load_path: str,
-        size: Optional[int] = None, # might restrict size for debugging
+        size: Optional[int] = None,  # might restrict size for debugging
         train: bool,
     ) -> None:
         super().__init__()
@@ -41,7 +40,8 @@ class MNISTDataset:
     def __getitem__(self, idx_like: int | slice) -> Tuple[NDArray, NDArray]:
         return self.labels[idx_like], self.digit_imgs[idx_like]
 
-class StandardDataModule(L.LightningDataModule):
+
+class MNISTDataModule(L.LightningDataModule):
     hparams: Any
     train_set: Dataset
     valid_set: Dataset
@@ -56,23 +56,22 @@ class StandardDataModule(L.LightningDataModule):
         val_frac: float = 0.1,
         dev_loader_conf: DictConfig,
         predict_loader_conf: DictConfig,
-        crop_at_size: Optional[int] = None,
     ):
         super().__init__()
         self.save_hyperparameters()
 
     def setup(self, stage: str):
         if stage in ["fit", "val"] and not hasattr(self, "train_set"):
-            dev_set = hydra.utils.instantiate(self.hparams.dev_set_conf)
+            dev_set = MNISTDataset(**self.hparams.dev_set_conf)
             self.train_set, self.val_set = train_valid_split(
                 dev_set, self.hparams.val_frac, split_type="rand"
             )
-        elif stage in ["fit", "val"] and hasattr(self, "train_set"): 
+        elif stage in ["fit", "val"] and hasattr(self, "train_set"):
             assert hasattr(self, "val_set")
         elif stage == "test":
-            pass # no idea for what testing would be useful
+            pass  # no idea for what testing would be useful
         elif stage == "predict":
-            self.predict_set = hydra.utils.instantiate(self.hparams.predict_set_conf)
+            self.predict_set = MNISTDataset(**self.hparams.predict_set_conf)
         else:
             assert False
 
@@ -80,7 +79,7 @@ class StandardDataModule(L.LightningDataModule):
         return DataLoader(self.train_set, shuffle=True, **self.hparams.dev_loader_conf)
 
     def val_dataloader(self) -> DataLoader:
-        return DataLoader(self.val_set, shuffle=True, **self.hparams.dev_loader_conf)
+        return DataLoader(self.val_set, shuffle=False, **self.hparams.dev_loader_conf)
 
     def test_dataloader(self) -> DataLoader:
         raise NotImplementedError
@@ -101,10 +100,16 @@ class StandardDataModule(L.LightningDataModule):
 
     def _preproc(self, dataset: MNISTDataset) -> Dataset:
         labels, digit_imgs = dataset[:]
-        return TensorDataset(torch.tensor(labels), torch.tensor(digit_imgs))
+        return TensorDataset(T.tensor(labels), T.tensor(digit_imgs))
 
     def _unpreproc(self, labels: T.Tensor) -> NDArray:
         return labels.numpy()
+
+    @staticmethod
+    def load_predict_set(checkpoint_path: str) -> MNISTDataset:
+        datamod = MNISTDataModule.load_from_checkpoint(checkpoint_path)
+        datamod.setup("predict")
+        return datamod.predict_set
 
 
 if __name__ == "__main__":
@@ -112,34 +117,38 @@ if __name__ == "__main__":
     import unittest
 
     from omegaconf import OmegaConf
-    
+
     class TestLabelledDigitsModule(unittest.TestCase):
         def test_setup(self):
             with tempfile.TemporaryDirectory() as load_path:
-                dev_set_conf = OmegaConf.create(dict(
-                    _target_="digit_classification.data.mnist.MNISTDataset",
-                    load_path=load_path,
-                    train=True,
-                    size=1,
-                ))
-                predict_set_conf = OmegaConf.create(dict(
-                    _target_="digit_classification.data.mnist.MNISTDataset",
-                    load_path=load_path,
-                    train=False,
-                    size=1,
-                ))
+                dev_set_conf = OmegaConf.create(
+                    dict(
+                        _target_="digit_classification.data.mnist.MNISTDataset",
+                        load_path=load_path,
+                        train=True,
+                        size=1,
+                    )
+                )
+                predict_set_conf = OmegaConf.create(
+                    dict(
+                        _target_="digit_classification.data.mnist.MNISTDataset",
+                        load_path=load_path,
+                        train=False,
+                        size=1,
+                    )
+                )
 
                 dev_loader_conf = OmegaConf.create(dict(batch_size=1))
                 predict_loader_conf = OmegaConf.create(dict(batch_size=1))
 
                 labels_pre = hydra.utils.instantiate(dev_set_conf)[:][0]
 
-                datamod = StandardDataModule(
+                datamod = MNISTDataModule(
                     dev_set_conf=dev_set_conf,
                     predict_set_conf=predict_set_conf,
                     val_frac=0.1,
                     dev_loader_conf=dev_loader_conf,
-                    predict_loader_conf=predict_loader_conf
+                    predict_loader_conf=predict_loader_conf,
                 )
                 datamod.setup("fit")
                 datamod.setup("val")
@@ -159,31 +168,35 @@ if __name__ == "__main__":
 
         def test_mock_sample(self):
             with tempfile.TemporaryDirectory() as load_path:
-                dev_set_conf = OmegaConf.create(dict(
-                    _target_="digit_classification.data.mnist.MNISTDataset",
-                    load_path=load_path,
-                    size=1,
-                    train=True
-                ))
-                predict_set_conf = OmegaConf.create(dict(
-                    _target_="digit_classification.data.mnist.MNISTDataset",
-                    load_path=load_path,
-                    size=1,
-                    train=False
-                ))
+                dev_set_conf = OmegaConf.create(
+                    dict(
+                        _target_="digit_classification.data.mnist.MNISTDataset",
+                        load_path=load_path,
+                        size=1,
+                        train=True,
+                    )
+                )
+                predict_set_conf = OmegaConf.create(
+                    dict(
+                        _target_="digit_classification.data.mnist.MNISTDataset",
+                        load_path=load_path,
+                        size=1,
+                        train=False,
+                    )
+                )
 
                 dev_loader_conf = OmegaConf.create(dict(batch_size=1))
                 predict_loader_conf = OmegaConf.create(dict(batch_size=1))
 
-                datamod = StandardDataModule(
+                datamod = MNISTDataModule(
                     dev_set_conf=dev_set_conf,
                     predict_set_conf=predict_set_conf,
                     val_frac=0.1,
                     dev_loader_conf=dev_loader_conf,
-                    predict_loader_conf=predict_loader_conf
+                    predict_loader_conf=predict_loader_conf,
                 )
                 datamod.setup("fit")
-                
+
                 for labels, digit_imgs in datamod.train_dataloader():
                     sample_real = labels, digit_imgs
                 mock_sample = datamod.mock_sample()

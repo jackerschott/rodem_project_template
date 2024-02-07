@@ -1,11 +1,18 @@
 defaults:
   - _self_
-  - model: cnn
-  - dataset: mnist
 
-  - trainenv: default
+  - load_model: cnn
+  - load_datamodule: labelled_digits
 
   - hydra: default
+  - common: default
+  - override common: private # create your own and never push! look at default for reference
 
-model_checkpoint_path: model.ckpt
-prediction_save_path: prediction.npz
+predictor:
+  _target_: lightning.Trainer
+  enable_progress_bar: true
+  logger: null
+
+io:
+  checkpoint_path: train_output/result.ckpt
+  predictions_save_path: prediction.npz

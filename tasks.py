@@ -48,7 +48,6 @@ def experiment_run(
     snakemake_cfg = " ".join(snakemake_cfg)
 
     snakemake_cmd = [
-        "PYTHONPATH=contrib/mltools:.",
         "snakemake",
         f"--snakefile workflow/{workflow}.smk",
         f"--workflow-profile workflow/profiles/{profile}",
@@ -60,3 +59,8 @@ def experiment_run(
     snakemake_cmd = " ".join(snakemake_cmd)
 
     ctx.run(f"{snakemake_cmd} {snakemake_args}", pty=True)
+
+
+@task
+def pre_commit(ctx: Context):
+    ctx.run("pre-commit run --all-files", pty=True)

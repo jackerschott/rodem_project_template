@@ -1,0 +1,4 @@
+roc_curve:
+  _target_: digit_classification.plotting.RocCurveTemplate
+  xlabel: "False Positive Rate"
+  ylabel: "True Positive Rate"

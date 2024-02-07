@@ -1,8 +1,0 @@
-api_key: null # will get set from snakemake
-user: jackerschott
-project: 'template'
-run_name: null # name of run, will get set from snakemake
-save_dir: null # will get set from snakemake
-tags: [] # will get set by snakemake
-
-run_id_path: null # used for resuming

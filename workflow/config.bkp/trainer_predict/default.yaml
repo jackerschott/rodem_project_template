@@ -1,4 +1,0 @@
-_target_: lightning.pytorch.Trainer
-
-enable_progress_bar: true
-enable_model_summary: false

@@ -1,0 +1,15 @@
+# no hydra stuff here, this has to be read by snakemake too!
+
+project_name: 'template'
+# put these on scratch
+container_path: null # recommended: /srv/beegfs/scratch/users/<u>/<user>/projects/<project_name>/container.sif
+experiments_base_path: null # recommended: /srv/beegfs/scratch/users/<u>/<user>/projects/<project_name>/experiments
+
+experiment_group: 'initial_testing' # determines workflow output folder
+stage: 'debug'
+matmul_precision: medium # should use medium if on ampere gpus
+model_compile_mode: null # can be set to default for faster compiles (very buggy!!!)
+
+# this has to go in the private config, since it's user specific
+logging:
+  wandb_username: null

@@ -1,5 +1,0 @@
-defaults:
-  - _self_
-  - dataset: mnist
-
-save_path: null

@@ -1,7 +1,0 @@
-api_key: null # will get set from snakemake
-user: jackerschott
-project: 'template'
-name: null # name of run, will get set from snakemake
-save_dir: null # will get set from snakemake
-tags:
-  - ${stage}
