@@ -9,5 +9,8 @@ readme = "README.md"
 version = "0.0.1"
 dynamic = ["dependencies"]
 
+[tool.setuptools]
+packages = ["digit_classification"]
+
 [tool.setuptools.dynamic]
 dependencies = {file = "requirements.txt"}

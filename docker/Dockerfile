@@ -14,10 +14,10 @@ RUN apt -y update && \
         texlive-fonts-extra \
         cm-super-minimal # needed for latex-support in matplotlib
 
-COPY requirements.txt .
-
-RUN conda update conda
-RUN conda install pip
-
-RUN pip install --upgrade pip
-RUN pip install --upgrade -r requirements.txt
+#COPY requirements.txt .
+#
+#RUN conda update conda
+#RUN conda install pip
+#
+#RUN pip install --upgrade pip
+#RUN pip install --upgrade -r requirements.txt

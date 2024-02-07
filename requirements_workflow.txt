@@ -1,4 +1,0 @@
-snakemake==8.3.2
-snakemake-executor-plugin-slurm==0.2.1
-invoke==2.2.0
-git+https://gitlab.cern.ch/mleigh/mltools@8b312b88bb7a31b811b2e90a9affbbb34774d794
