@@ -1,0 +1,23 @@
+cookiecutterize:
+  stage: cookiecutterize
+  image: python:3.11
+  script:
+    # make sure we don't trigger this pipeline recursively!!!
+    - echo $CI_COMMIT_BRANCH
+    - test $CI_COMMIT_BRANCH != cookiecutter
+    # make sure we can access the repo
+    - git config --global user.email "cookiecutterizer@email.com"
+    - git config --global user.name "cookiecutterizer"
+    - git remote add origin_with_access_token https://oauth2:$COOKIECUTTERIZE_ACCESS_TOKEN@gitlab.cern.ch/rodem/projects/projecttemplate
+    # make sure the cookiecutter branch is deleted
+    - git branch -D cookiecutter || true
+    - git push -d origin_with_access_token cookiecutter || true
+    # create cookiecutter branch
+    - git branch cookiecutter
+    - git checkout cookiecutter
+    # actual cookiecutterization
+    - python cookiecutter/cookiecutterize.py
+    # add, commit and push
+    - git add . .gitlab-ci.yml # make sure the deleted .gitlab-ci.yml gets added!
+    - git commit -m 'cookiecutterize repository'
+    - git push origin_with_access_token cookiecutter

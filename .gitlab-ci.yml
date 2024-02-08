@@ -1,10 +1,13 @@
+include: 'cookiecutter/cookiecutterize.yml'
+
 stages:
   - lint
+  - cookiecutterize
   - build
 
 pre-commit:
   stage: lint
-  image: python:3.10
+  image: python:3.11
   script:
     - python3 -m pip install pre-commit==3.4.0
     - pre-commit run --all-files
