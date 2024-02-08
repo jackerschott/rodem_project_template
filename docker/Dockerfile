@@ -1,4 +1,4 @@
-FROM pytorch/pytorch:2.1.1-cuda12.1-cudnn8-runtime
+FROM pytorch/pytorch:2.2.0-cuda12.1-cudnn8-runtime
 
 ARG DEBIAN_FRONTEND=noninteractive
 
@@ -14,10 +14,11 @@ RUN apt -y update && \
         texlive-fonts-extra \
         cm-super-minimal # needed for latex-support in matplotlib
 
-#COPY requirements.txt .
-#
-#RUN conda update conda
-#RUN conda install pip
-#
-#RUN pip install --upgrade pip
-#RUN pip install --upgrade -r requirements.txt
+COPY requirements.txt requirements_main.txt
+COPY libs/mltools/requirements.txt requirements_mltools.txt
+
+RUN conda update conda
+RUN conda install pip
+
+RUN pip install --upgrade pip
+RUN pip install --upgrade -r requirements_main.txt -r requirements_mltools.txt
