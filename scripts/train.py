@@ -31,12 +31,11 @@ def main(cfg: DictConfig) -> None:
     # use a mock sample of the data to figure out model in/out dims
     log.info("Instantiating the model")
     model = hydra.utils.instantiate(cfg.model, mock_sample=datamodule.mock_sample())
-
-    if cfg.compile:
+    if cfg.common.model_compile_mode:
         log.info(
             f"Compiling the model using torch 2.0: {cfg.common.model_compile_mode}"
         )
-        model = T.compile(model, mode=cfg.compile)
+        model = T.compile(model, mode=cfg.common.model_compile_mode)
 
     trainer: L.Trainer = hydra.utils.instantiate(cfg.trainer)
 
@@ -46,7 +45,7 @@ def main(cfg: DictConfig) -> None:
         log.info(model)
 
     log.info("Train")
-    trainer.fit(model, datamodule)
+    trainer.fit(model, datamodule, ckpt_path=cfg.init_ckpt_path)
 
     # We want to have a nice and predictable model save path for predicting, no matter
     # what we do regarding checkpointing; this is also practically relevant, so

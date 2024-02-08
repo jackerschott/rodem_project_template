@@ -8,6 +8,7 @@ singularity-args: >-
   --nv
   --cleanenv
   --env WANDB_API_KEY=$WANDB_API_KEY
+  --env PYTHONPATH=.:libs/mltools
   --bind /srv/beegfs/scratch:/srv/beegfs/scratch
 
 slurm: true

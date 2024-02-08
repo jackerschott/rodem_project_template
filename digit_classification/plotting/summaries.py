@@ -10,13 +10,16 @@ class ROC(PredictionSummary):
         self,
         *,
         truth_ref: MNISTDataset,
-        pred_ref: dict[str, np.ndarray],
+        pred_ref: dict[str, dict[str, np.ndarray]],
         digit: int,
     ):
         super().__init__()
         truth_labels_one_hot = np.eye(10)[truth_ref.labels]
 
-        assert truth_labels_one_hot.shape == pred_ref[pred_ref.keys()[0]].shape
+        assert (
+            truth_labels_one_hot.shape
+            == pred_ref[list(pred_ref.keys())[0]]["labels"].shape
+        )
         self.truth_ref = truth_labels_one_hot
         self.pred_ref = pred_ref
 
@@ -25,7 +28,7 @@ class ROC(PredictionSummary):
 
     def compute(self, source: str):
         prob_truth = self.truth_ref[:, self.digit]
-        prob_pred = self.pred_ref[source][:, self.digit]
+        prob_pred = self.pred_ref[source]["labels"][:, self.digit]
 
         false_positive_rate, true_positive_rate, _ = roc_curve(prob_truth, prob_pred)
         return (

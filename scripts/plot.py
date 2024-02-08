@@ -21,7 +21,7 @@ def main(cfg: DictConfig) -> None:
     truth = hydra.utils.call(cfg.plot_def.load_predict_set)
 
     predictions = {}
-    for source_id, prediction_path in cfg.prediction_paths:
+    for source_id, prediction_path in cfg.io.prediction_paths.items():
         predictions[source_id] = load_nested_array_dict_from_h5(prediction_path)
 
     log.info("Create prediction summaries")
@@ -29,7 +29,7 @@ def main(cfg: DictConfig) -> None:
         summary_id: hydra.utils.instantiate(
             summary_cfg, truth_ref=truth, pred_ref=predictions
         )
-        for summary_id, summary_cfg in cfg.plot_def.prediction_summaries
+        for summary_id, summary_cfg in cfg.plot_def.prediction_summaries.items()
         # only instantiate summaries that are actually used in the layout
         if any(summary_id in row for row in cfg.plot_def.layout)
     }
@@ -37,18 +37,18 @@ def main(cfg: DictConfig) -> None:
     log.info("Instantiate templates")
     templates = hydra.utils.instantiate(cfg.plot_def.templates)
 
-    with PdfPages(cfg.output_file) as fig_dest:
+    with PdfPages(cfg.io.output_path) as fig_dest:
         log.info("Instantiating target and template")
         target = hydra.utils.instantiate(cfg.plot_def.target)
 
         log.info("Plot prediction summaries and save result")
-        for summary in summaries:
-            log.info(f"Plot {summary.id}")
+        for summary_id, summary in summaries.items():
+            log.info(f"Plot {summary_id}")
             template_id = find_template_id(
-                summary.id, cfg.plot_def.template_summary_map
+                summary_id, cfg.plot_def.summary_template_map
             )
 
-            fig = target.setup_figure(cfg.plot_def.layout, summary.id)
+            fig = target.setup_figure(cfg.plot_def.layout, summary_id)
             templates[template_id].plot(fig, summary)
             target.save_figure(fig, fig_dest)
 

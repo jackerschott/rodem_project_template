@@ -4,7 +4,7 @@ import tempfile
 import hydra
 import torch as T
 from mltools.hydra_utils import print_config
-from mltools.utils import save_nested_array_dict_to_h5
+from mltools.utils import save_nested_array_dict_as_h5
 from omegaconf import DictConfig
 
 # setup logger
@@ -24,7 +24,12 @@ def main(cfg: DictConfig) -> None:
     datamodule = hydra.utils.call(cfg.load_datamodule)
 
     log.info("Loading model from checkpoint")
-    model = hydra.utils.call(cfg.load_model)
+    model = hydra.utils.call(cfg.load_model, mock_sample=datamodule.mock_sample())
+    if cfg.common.model_compile_mode:
+        log.info(
+            f"Compiling the model using torch 2.0: {cfg.common.model_compile_mode}"
+        )
+        model = T.compile(model, mode=cfg.common.model_compile_mode)
 
     log.info("Instantiating the trainer")
     # we are just predicting, so we don't care about logs
@@ -38,7 +43,7 @@ def main(cfg: DictConfig) -> None:
     pred = datamodule.invert_setup_on_prediction(batches)
 
     log.info("Saving prediction")
-    save_nested_array_dict_to_h5(cfg.predictions_save_path, pred)
+    save_nested_array_dict_as_h5(cfg.io.predictions_save_path, pred)
 
 
 if __name__ == "__main__":

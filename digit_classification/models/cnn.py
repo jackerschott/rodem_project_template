@@ -7,7 +7,6 @@ import torch.nn as nn
 
 
 class ConvClassifier(L.LightningModule):
-    IMG_SIZE = 28
     DIGIT_COUNT = 10
 
     network: nn.Module
@@ -23,16 +22,16 @@ class ConvClassifier(L.LightningModule):
         optimizer_factory: partial,
     ):
         super().__init__()
-        self.save_hyperparameters()
+        # mock sample contains non-builtin types; ignore so we can load from checkpoint
+        self.save_hyperparameters(ignore=("mock_sample",))
 
-        label_sample, digit_img_sample = mock_sample
+        _, digit_img_sample = mock_sample
 
-        assert (
-            digit_img_sample.shape[-1] == self.IMG_SIZE
-            and digit_img_sample.shape[-2] == self.IMG_SIZE
-        )
+        assert digit_img_sample.shape[-1] == digit_img_sample.shape[-2]
+        img_size = digit_img_sample.shape[-1]
+
         assert conv_blocks_1 > 0 and conv_blocks_2 > 0
-        img_size_after_conv_1 = self.IMG_SIZE - 2 * conv_blocks_1
+        img_size_after_conv_1 = img_size - 2 * conv_blocks_1
         img_size_after_conv_1 //= 2  # max pooling
         img_size_after_conv_2 = img_size_after_conv_1 - 2 * conv_blocks_2
         mlp_width = img_size_after_conv_2**2 * hidden_conv_channels

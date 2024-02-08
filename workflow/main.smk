@@ -11,10 +11,14 @@ exp_group, exp_name = config["exp_group"], config["exp_name"]
 exp_path = os.path.join(config["experiments_base_path"], exp_group, exp_name)
 exp_id = f"{exp_group}/{exp_name}"
 
+model = "cnn"
+datamodule = "mnist"
+
 
 rule all:
     input:
-        f"{exp_path}/plots/roc_curves_none.pdf" f"{exp_path}/plots/roc_curves_paper.pdf",
+        f"{exp_path}/plots/rocs.pdf",
+        f"{exp_path}/plots/paper.pdf",
 
 
 rule plot:
@@ -24,15 +28,16 @@ rule plot:
         prediction_1=f"{exp_path}/predictions/prediction_1.h5",
         prediction_2=f"{exp_path}/predictions/prediction_2.h5",
     output:
-        plot=f"{exp_path}/plots/roc_curves_{{plot_target}}.pdf",
+        plot=f"{exp_path}/plots/{{plot_target}}.pdf",
     params:
         "scripts/plot.py",
-        "load_predict_set=labelled_digits",
-        "plot_target={plot_target}",
-        "plot_template=truth_reco_diff",
-        "io.checkpoint_path={input.dataset}",
-        #f'+io.prediction_paths.channels_{hidden_conv_channels(1)}={input.prediction_1}',
-        #f'+io.prediction_paths.channels_{hidden_conv_channels(2)}={input.prediction_2}',
+        #f"plot_def.load_predict_set={datamodule}",
+        "plot_def={plot_target}",
+        "io.checkpoint_path={input.ckpt}",
+        f"+io.prediction_paths.channels_{hidden_conv_channels(1)}={{input.prediction_1}}",
+        f"+io.prediction_paths.channels_{hidden_conv_channels(2)}={{input.prediction_2}}",
+        "io.output_path={output.plot}",
+        f"hydra.run.dir={exp_path}/hydra/predict",
     log:
         f"{exp_path}/logs/plot_{{plot_target}}.log",
     wrapper:
@@ -46,10 +51,10 @@ rule predict:
         prediction=f"{exp_path}/predictions/prediction_{{i}}.h5",
     params:
         "scripts/predict.py",
-        "load_model=cnn",
-        "load_datamodule=labelled_digits",
+        f"load_model={model}",
+        f"load_datamodule={datamodule}",
         "io.checkpoint_path={input.ckpt}",
-        "io.predictions_save_path={output.prediction}"
+        "io.predictions_save_path={output.prediction}",
         f"hydra.run.dir={exp_path}/hydra/predict",
     threads: 4
     resources:
@@ -67,9 +72,9 @@ rule train:
         ckpt=f"{exp_path}/train_output/result_{{i}}.ckpt",
     params:
         "scripts/train.py",
-        "model=cnn",
+        f"model={model}",
         lambda wc: f"model.hidden_conv_channels={hidden_conv_channels(wc.i)}",
-        "datamodule=labelled_digits",
+        f"datamodule={datamodule}",
         "datamodule.dev_loader_conf.num_workers={threads-1}",
         # careful, thread count here and in predict should be the same!
         "datamodule.predict_loader_conf.num_workers={threads-1}",

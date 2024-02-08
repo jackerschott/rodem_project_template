@@ -2,7 +2,7 @@ defaults:
   - _self_
 
   - load_model: cnn
-  - load_datamodule: labelled_digits
+  - load_datamodule: mnist
 
   - hydra: default
   - common: default

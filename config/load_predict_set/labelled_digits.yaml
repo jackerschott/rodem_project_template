@@ -1,2 +1,0 @@
-_target_: digit_classification.data.mnist.LabelledDigitsModule.load_predict_set
-checkpoint_path: ${io.checkpoint_path}

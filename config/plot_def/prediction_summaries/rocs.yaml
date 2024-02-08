@@ -1,10 +1,10 @@
-roc_0: { _target_: digit_classification.plotting.summaries.ROC, id: 0, digit: 0 }
-roc_1: { _target_: digit_classification.plotting.summaries.ROC, id: 1, digit: 1 }
-roc_2: { _target_: digit_classification.plotting.summaries.ROC, id: 2, digit: 2 }
-roc_3: { _target_: digit_classification.plotting.summaries.ROC, id: 3, digit: 3 }
-roc_4: { _target_: digit_classification.plotting.summaries.ROC, id: 4, digit: 4 }
-roc_5: { _target_: digit_classification.plotting.summaries.ROC, id: 5, digit: 5 }
-roc_6: { _target_: digit_classification.plotting.summaries.ROC, id: 6, digit: 6 }
-roc_7: { _target_: digit_classification.plotting.summaries.ROC, id: 7, digit: 7 }
-roc_8: { _target_: digit_classification.plotting.summaries.ROC, id: 8, digit: 8 }
-roc_9: { _target_: digit_classification.plotting.summaries.ROC, id: 9, digit: 9 }
+roc_0: { _target_: digit_classification.plotting.summaries.ROC, digit: 0 }
+roc_1: { _target_: digit_classification.plotting.summaries.ROC, digit: 1 }
+roc_2: { _target_: digit_classification.plotting.summaries.ROC, digit: 2 }
+roc_3: { _target_: digit_classification.plotting.summaries.ROC, digit: 3 }
+roc_4: { _target_: digit_classification.plotting.summaries.ROC, digit: 4 }
+roc_5: { _target_: digit_classification.plotting.summaries.ROC, digit: 5 }
+roc_6: { _target_: digit_classification.plotting.summaries.ROC, digit: 6 }
+roc_7: { _target_: digit_classification.plotting.summaries.ROC, digit: 7 }
+roc_8: { _target_: digit_classification.plotting.summaries.ROC, digit: 8 }
+roc_9: { _target_: digit_classification.plotting.summaries.ROC, digit: 9 }

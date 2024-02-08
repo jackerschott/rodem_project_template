@@ -1,6 +1,6 @@
 defaults:
   - _self_
-  - load_predict_set: labelled_digits
+  - load_predict_set: mnist
 
   # how to setup the correct figure size, fonts, matplotlib layout and defaults for any
   # plot according to the place where they should end up (i.e. a monitor (for testing),
@@ -22,11 +22,14 @@ defaults:
 # must still be done in e.g. latex; note that each prediction summary ID should only be
 # present once (you don't want the exact same plot twice anyway)
 layout:
-  - ['0', '1', '2', '3', '4']
-  - ['5', '6', '7', '8', '9']
+  - ['roc_0', 'roc_1']
+  - ['roc_2', 'roc_3']
+  - ['roc_4', 'roc_5']
+  - ['roc_6', 'roc_7']
+  - ['roc_8', 'roc_9']
 
 # which template do we use to plot which prediction summaries? this is a more convenient
 # way to define this mapping, but it should be convertible to a
 # summary_id -> template_id dictionary
 summary_template_map:
-  roc_curve: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+  roc_curve: ['roc_0', 'roc_1', 'roc_2', 'roc_3', 'roc_4', 'roc_5', 'roc_6', 'roc_7', 'roc_8', 'roc_9']

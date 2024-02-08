@@ -8,7 +8,7 @@ class Monitor(PlotTarget):
 
     def __init__(self) -> None:
         reasonable_plot_width = self.APPROX_STANDARD_MONITOR_WIDTH_MM / 2
-        reasonable_font_size = self.APPROX_STANDARD_MONITOR_WIDTH_MM / 100
+        reasonable_font_size = self.APPROX_STANDARD_MONITOR_WIDTH_MM / 50
         super().__init__(
             columnwidth_mm=reasonable_plot_width,
             use_latex=False,
@@ -32,11 +32,10 @@ class Paper(PlotTarget):
         latex_imports: str,
     ) -> None:
         super().__init__(
-            columnwidth_mm=columnwidth_pt * cs.pt * 1000,
-            use_latex=False,
+            columnwidth_mm=columnwidth_pt * cs.pt / cs.milli,
             latex_documentclass=latex_documentclass,
             latex_default_fontsize=latex_default_fontsize,
             latex_imports=latex_imports,
-            fontsize_plots="normalsize",
+            fontsize_plots="small",
             fontfamily_plots="sans-serif",
         )

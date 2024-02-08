@@ -1,3 +1,4 @@
+from functools import partial
 from typing import Any, Iterable, Optional, Tuple
 
 import hydra
@@ -51,8 +52,8 @@ class MNISTDataModule(L.LightningDataModule):
     def __init__(
         self,
         *,
-        dev_set_conf: DictConfig,
-        predict_set_conf: DictConfig,
+        dev_set_factory: partial,
+        predict_set_factory: partial,
         val_frac: float = 0.1,
         dev_loader_conf: DictConfig,
         predict_loader_conf: DictConfig,
@@ -62,7 +63,7 @@ class MNISTDataModule(L.LightningDataModule):
 
     def setup(self, stage: str):
         if stage in ["fit", "val"] and not hasattr(self, "train_set"):
-            dev_set = MNISTDataset(**self.hparams.dev_set_conf)
+            dev_set = self.hparams.dev_set_factory()
             self.train_set, self.val_set = train_valid_split(
                 dev_set, self.hparams.val_frac, split_type="rand"
             )
@@ -71,7 +72,7 @@ class MNISTDataModule(L.LightningDataModule):
         elif stage == "test":
             pass  # no idea for what testing would be useful
         elif stage == "predict":
-            self.predict_set = MNISTDataset(**self.hparams.predict_set_conf)
+            self.predict_set = self.hparams.predict_set_factory()
         else:
             assert False
 
@@ -96,7 +97,7 @@ class MNISTDataModule(L.LightningDataModule):
         return T.zeros((1,)), T.zeros((1, 28, 28))
 
     def invert_setup_on_prediction(self, batches: Iterable) -> dict[str, T.Tensor]:
-        return self._unpreproc(T.cat(batches))
+        return dict(labels=self._unpreproc(T.cat(batches)))
 
     def _preproc(self, dataset: MNISTDataset) -> Dataset:
         labels, digit_imgs = dataset[:]
@@ -144,8 +145,8 @@ if __name__ == "__main__":
                 labels_pre = hydra.utils.instantiate(dev_set_conf)[:][0]
 
                 datamod = MNISTDataModule(
-                    dev_set_conf=dev_set_conf,
-                    predict_set_conf=predict_set_conf,
+                    dev_set_factory=dev_set_conf,
+                    predict_set_factory=predict_set_conf,
                     val_frac=0.1,
                     dev_loader_conf=dev_loader_conf,
                     predict_loader_conf=predict_loader_conf,
@@ -189,8 +190,8 @@ if __name__ == "__main__":
                 predict_loader_conf = OmegaConf.create(dict(batch_size=1))
 
                 datamod = MNISTDataModule(
-                    dev_set_conf=dev_set_conf,
-                    predict_set_conf=predict_set_conf,
+                    dev_set_factory=dev_set_conf,
+                    predict_set_factory=predict_set_conf,
                     val_frac=0.1,
                     dev_loader_conf=dev_loader_conf,
                     predict_loader_conf=predict_loader_conf,
