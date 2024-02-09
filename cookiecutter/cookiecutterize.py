@@ -62,7 +62,7 @@ def cookiecutterize_pyproject_toml():
 
     content = content.replace(
         'name = "digit_classification"',
-        f'name = "{cookiecutter_string("project_name")}"',
+        f'name = "{cookiecutter_string("python_package_name")}"',
     )
     content = content.replace(
         'description = "RODEM Project Template"',
@@ -81,7 +81,9 @@ def cookiecutterize_common_default_config():
     with open("config/common/default.yaml") as f:
         content = f.read()
 
-    content = content.replace("template", cookiecutter_string("project_name"))
+    # use repo name; should be a decent default without introducing another
+    # cookiecutter variable
+    content = content.replace("template", cookiecutter_string("repo_name"))
 
     with open("config/common/default.yaml", "w") as f:
         f.write(content)
@@ -110,6 +112,23 @@ def create_common_private_config():
         f.write(content)
 
 
+def cookiecutterize_tasks_py():
+    with open("tasks.py") as f:
+        content = f.read()
+
+    content = content.replace(
+        "docker://gitlab-registry.cern.ch/rodem/",
+        f"docker://gitlab-registry.cern.ch/{cookiecutter_string('username_gitlab')}/",
+    )
+    content = content.replace(
+        "projects/projecttemplate/docker-image:latest",
+        f"projects/{cookiecutter_string('repo_name')}/docker-image:latest",
+    )
+
+    with open("tasks.py", "w") as f:
+        f.write(content)
+
+
 def cookiecutterize_package_dir():
     shutil.move("digit_classification", cookiecutter_string("python_package_name"))
 
@@ -132,5 +151,6 @@ os.chdir(REPO_DIR)
 cookiecutterize_license()
 cookiecutterize_pyproject_toml()
 cookiecutterize_config()
+cookiecutterize_tasks_py()
 cookiecutterize_package_dir()
 strip_cookiecutterize_from_ci_config()

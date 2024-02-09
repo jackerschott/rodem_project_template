@@ -11,7 +11,7 @@ singularity-args: >-
   --env PYTHONPATH=.:libs/mltools
   --bind /srv/beegfs/scratch:/srv/beegfs/scratch
 
-slurm: true
+executor: slurm
 default-resources:
   slurm_account: golling
   slurm_partition: shared-gpu,private-dpnc-gpu

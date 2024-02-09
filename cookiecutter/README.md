@@ -59,7 +59,7 @@ Note that cookiecutter will ask you for a container path and a base path for
 experiment output.
 For the container path, the corresponding container is supposed to be build by the provided Dockerfile
 and gitlab CI and pulled to the provided path later.
-Naturally the container path can always be changed by editing `workflow/main.smk` and `workflow/sweep.smk`.
+Naturally the container path can always be changed by editing `config/common/private.yaml`.
 Regarding the experiment base path, be careful that you avoid symlinks within
 that path, in particular the `scratch` symlink in your home directory, as this
 will cause problems with snakemake trying to find this path inside and outside
@@ -71,14 +71,14 @@ initialize one and push it to gitlab
 ```
 git init
 git add .
-git rm --cached workflow/experiment_config.yaml
+git rm --cached config/common/private.yaml
 git commit -m 'add rodem ml project template'
 git remote add origin ssh://git@gitlab.cern.ch:7999/<gitlab_username>/$(git rev-parse --show-toplevel | xargs basename).git
 git push --set-upstream origin master
 ```
 This will also automatically launch a gitlab pipeline to build a container,
 using the provided Dockerfile.
-Note that we do not commit and push `workflow/experiment_config.yaml`, since this will be
+Note that we do not commit and push `config/common/private.yaml`, since this will be
 user specific.
 
 After the pipeline is done you want to pull the container

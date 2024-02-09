@@ -7,7 +7,7 @@ envvars:
 
 hidden_conv_channels = lambda i: [4, 8][int(i) - 1]
 
-exp_group, exp_name = config["exp_group"], config["exp_name"]
+exp_group, exp_name = config["experiment_group"], config["experiment_name"]
 exp_path = os.path.join(config["experiments_base_path"], exp_group, exp_name)
 exp_id = f"{exp_group}/{exp_name}"
 

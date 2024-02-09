@@ -1,11 +1,11 @@
 {
-    "project_name": null,
-    "gitlab_username": null,
+    "project_name": "Example Project",
+    "username_gitlab": "jackersc",
+    "username_cluster": "ackersch",
     "repo_name": "{{ cookiecutter.project_name.strip().replace(' ', '-').replace('_', '-').lower() }}",
     "python_package_name": "{{ cookiecutter.project_name.strip().replace(' ', '_').replace('-', '_').lower() }}",
-    "container_path": null,
-    "experiments_base_path": null,
-    "wandb_username": null,
-    "wandb_projectname": "{{ cookiecutter.project_name }}",
-    "your_name": null
+    "container_path": "/srv/beegfs/scratch/users/a/{{ cookiecutter.username_cluster }}/projects/{{ cookiecutter.project_name.strip().replace(' ', '-').replace('_', '-').lower() }}/container.sif",
+    "experiments_base_path": "/srv/beegfs/scratch/users/a/{{ cookiecutter.username_cluster }}/projects/{{ cookiecutter.project_name.strip().replace(' ', '-').replace('_', '-').lower() }}/experiments",
+    "wandb_username": "jackerschott",
+    "your_name": "Jona Ackerschott"
 }
