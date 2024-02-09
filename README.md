@@ -1,114 +1,101 @@
-<div align="center">
+# The RODEM HEP project starter
 
-# RODEM Project Template: MNIST Example
+## Introduction
 
-[![python](https://img.shields.io/badge/-Python_3.11-3776AB?logo=python&logoColor=white)](https://www.python.org/)
-[![pytorch](https://img.shields.io/badge/-PyTorch_2.1-EE4C2C?logo=pytorch&logoColor=white)](https://pytorch.org/)
-[![lightning](https://img.shields.io/badge/-Lightning_2.1-792EE5?logo=lightning&logoColor=white)](https://lightning.ai/)
-[![hydra](https://img.shields.io/badge/-Hydra_1.3-89b8cd&logoColor=white)](https://hydra.cc/)
-[![wandb](https://img.shields.io/badge/-WandB_0.16-orange?logo=weightsandbiases&logoColor=white)](https://wandb.ai)
-[![snakemake](https://img.shields.io/badge/-Snakemake_7.32.4-039475)](https://snakemake.readthedocs.io/)
-[![invoke](https://img.shields.io/badge/-Invoke_2.2.0-yellow)](https://www.pyinvoke.org/)
-</div>
+This repository serves as a template for a typical research machine learning workflow.
+It is loosely based on the PyTorch Lightning Hydra template by ashleve.
+The basic usage and goals off this template are described in the following.
+The README in the project itself provides more detailed usage instructions.
 
-This is an example application of the
-[RODEM machine learning template](https://gitlab.cern.ch/rodem/projects/projecttemplate/), using a CNN
-classifier for MNIST digit classification.
-It relies on pytorch and lightning for machine learning, wandb for experiment
-tracking, hydra for configuration management, snakemake for workflow management
-and invoke as a project cli.
-Additionally, [MLTools](https://gitlab.cern.ch/mleigh/mltools/) is used for certain helper functions.
+## Typical workflow
+1) Research and development:
+    * Collect data.
+    * Get data loader.
+    * Develop models.
+    * Test models.
+2) Start writing paper:
+    * Settle on models and evaluation.
+    * Run pipeline.
+3) New requests:
+    * Update models.
+    * Extend evaluation.
+    * Rerun models.
+    * Rerun evaluation.
+    * Update paper.
+4) Iterate 3 until done.
 
-## Usage
+In the above workflow by far the most exhausting, time consuming, and boring, is step 4.
+This template uses snakemake to build flexible automated workflows, which can combine
+data generation, model training, model evaluation and result plotting into a
+single command that automatically launches slurm jobs.
 
-After cloning the repo, start by setting up a virtual environment on an HPC
-cluster with slurm installed:
+## Using this template
+Start by setting up a new virtual environment on an HPC cluster with slurm and
+install cookiecutter:
 ```
-module load GCCcore/12.3.0 Python/3.11.3
-python -m venv <env_path>
+python3 -m venv <env_path>
 source <env_path>/bin/activate
 pip install --upgrade pip
-pip install -r requirements_workflow.txt
+pip install cookiecutter
 ```
-We start by loading the python module here (this is cluster specific), to make sure that we have a
-newer python version, which is needed for some of the packages we want to use.
+This environment can and should be reused for installing the
+workflow requirements as described in the project readme.
 
-Next, make your wandb api key available by adding the following line to your .bashrc:
+Now we can run
 ```
-WANDB_API_KEY=<your-api-key>
+cookiecutter ssh://git@gitlab.cern.ch:7999/rodem/projects/projecttemplate.git
 ```
-This method is strictly for convenience and it should be noted that while other cluster users have
-no access to your bashrc, for any admin it is easy to retreive your key.
-So you might want to use a different method.
-Be warned though that WandB itself also saves the key in plain text in $HOME/.netrc, so it is not
-an easy task to circumvent this problem.
-
-Now we can start the actual workflow.
-This could be done with snakemake directly, but is a bit more convenient with invoke.
-The latter simply provides a python wrapper around snakemake in `tasks.py` which neatly
-documents the actually used commands and flags.
-To run the main workflow with invoke without a container or slurm on the login node, simply type
+And follow the prompts to create your new project.
+To use a specific branch:
 ```
-invoke experiment-run <experiment_name>
+cookiecutter -c <branch> ssh://git@gitlab.cern.ch:7999/rodem/projects/projecttemplate.git
 ```
-where `<experiment_name>` is used to identify the current run/experiment and to define
-the overall output directory, which will be `experiments/initial_testing/<experiment_name>`.
-Under the hood, this command will run
+You can also clone the repository and then define a new instance as follows
 ```
-snakemake \
-    --snakefile workflow/main.smk \
-    --workflow-profile workflow/profiles/test \
-    --configfile config/common/default.yaml config/common/private.yaml \
-    --config experiment_name=<experiment_name>
+git clone ssh://git@gitlab.cern.ch:7999/rodem/projects/projecttemplate.git
+cookiecutter projecttemplate
 ```
-Check out tasks.py for details on the experiment-run subcommand. Note that all
-invoke flags directly translate to shell flags (i.e. use `--profile` to define the
-`profile` argument).
+Note that cookiecutter will ask you for a container path and a base path for
+experiment output.
+For the container path, the corresponding container is supposed to be build by the provided Dockerfile
+and gitlab CI and pulled to the provided path later.
+Naturally the container path can always be changed by editing `config/common/private.yaml`.
+Regarding the experiment base path, be careful that you avoid symlinks within
+that path, in particular the `scratch` symlink in your home directory, as this
+will cause problems with snakemake trying to find this path inside and outside
+of the container.
 
-The invoke command provided above runs snakemake with the `test` profile, which
-neither invokes slurm, nor uses a container and runs everything sequentially.
-One can use a container and parallelization with the `test-in-container`
-profile, while the `slurm` profile instructs snakemake to automatically launch slurm
-jobs for each workflow step, using parallelization and containers as well.
+Afterwards you will be left with a new repository using the values you entered.
+This repository will not by default be a git repository, so you want to
+initialize one and push it to gitlab
+```
+git init
+git add .
+git rm --cached config/common/private.yaml
+git commit -m 'add rodem ml project template'
+git remote add origin ssh://git@gitlab.cern.ch:7999/<gitlab_username>/$(git rev-parse --show-toplevel | xargs basename).git
+git push --set-upstream origin master
+```
+This will also automatically launch a gitlab pipeline to build a container,
+using the provided Dockerfile.
+Note that we do not commit and push `config/common/private.yaml`, since this will be
+user specific.
 
-The example workflow defined in `workflow/main.smk` looks as follows
+After the pipeline is done you want to pull the container
+```
+inv container-pull --login
+```
+This automatically pulls the container to the `container_path` entered
+previously.
 
-![DAG](dag.png)
-
-As you can see, this workflow will train two models, which differ by the number of hidden channels
-in the convolution layers, predict labels from both models and plot ROC curves.
-The all rule is simply the last rule and defines all output files that should be present.
-The resulting plots can be found in `experiments/initial_testing/<experiment_name>/plots/rocs.pdf`
-and `experiments/initial_testing/<experiment_group>/plots/paper.pdf`, where the
-latter are optimised for a corresponding latex document.
-
-## Scripts
-
-There are three hydra scripts that get called by snakemake: `scripts/train.py`, `scripts/predict.py`, `scripts/plot.py`.
-These scripts should be generic enough to never be changed for any kind of ML project.
-However you might want to add additional scripts. This includes plotting scripts in particular, since the plotting
-script is only meant to be used for prediction vs truth plots in any kind of
-summarizing metric.
-
-## Configuration
-
-All configuration is handled by hydra and is stored as `config/<workflow_step_name>.yaml`.
-There are two special files, `config/common/default.yaml` and `config/common/private.yaml`, which are
-used by snakemake and hydra.
-Note that `config/common/private.yaml` should never be pushed, since its user specific.
-
-## Docker and Gitlab
-
-This project is setup to use the CERN GitLab CI/CD to automatically build a Docker image based
-on the `docker/Dockerfile` and `requirements.txt`.
-It will also run the pre-commit as part of the pipeline.
-To edit this behaviour change `.gitlab-ci.yml`
+This concludes the setup.
+For instructions on how to run experiments, you can check out the README inside the project.
 
 ## Contributing
 
 Contributions are welcome! Please submit a pull request or create an issue if you have any improvements or suggestions.
-Please use the provided `pre-commit` before making merge requests!
-
-## License
-
-This project is licensed under the MIT License. See the LICENSE file for details.
+Note that the `master` branch is nothing but a few commits on top of the `example` branch that
+"cookiecutterizes" everything.
+So for almost all development you want to use the example branch and rebase the
+master branch onto it.
+Also, please use the provided `pre-commit` before making merge requests!

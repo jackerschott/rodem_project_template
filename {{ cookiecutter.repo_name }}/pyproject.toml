@@ -3,14 +3,14 @@ requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "digit_classification"
-description = "RODEM Project Template"
+name = "{{ cookiecutter.python_package_name }}"
+description = "{{ cookiecutter.project_name }}"
 readme = "README.md"
 version = "0.0.1"
 dynamic = ["dependencies"]
 
 [tool.setuptools]
-packages = ["digit_classification"]
+packages = ["{{ cookiecutter.python_package_name }}"]
 
 [tool.setuptools.dynamic]
 dependencies = {file = "requirements.txt"}

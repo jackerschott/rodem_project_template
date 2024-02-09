@@ -1,8 +1,5 @@
-include: 'cookiecutter/cookiecutterize.yml'
-
 stages:
   - lint
-  - cookiecutterize
   - build
 
 pre-commit:

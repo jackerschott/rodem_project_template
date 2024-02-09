@@ -96,7 +96,7 @@ def pull_container(ctx: Context, login: bool = False):
         apptainer_pull_args.append("--docker-login")
 
     url = (
-        "docker://gitlab-registry.cern.ch/rodem/"
-        "projects/projecttemplate/docker-image:latest"
+        "docker://gitlab-registry.cern.ch/{{ cookiecutter.username_gitlab }}/"
+        "projects/{{ cookiecutter.repo_name }}/docker-image:latest"
     )
     ctx.run(f"apptainer pull {apptainer_pull_args} {url}", pty=True)
